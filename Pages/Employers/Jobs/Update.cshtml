@@ -1,0 +1,95 @@
+@page "/MyJobs/{jobId}/Update"
+@using System.Globalization
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Update
+
+@{
+    ViewData["Title"] = "Update job";
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="toast-container p-3 top-0 start-50 translate-middle-x">
+        <div id="formToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+             aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @Model.Error
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    Model.Error = null;
+}
+
+@if (Model.JobDto.DateOfBegin.AddDays(Model.JobDto.Duration) < DateTime.UtcNow)
+{
+    <h3 class="text-secondary">Unable to update job that has already finished</h3>
+}
+else if (Model.JobDto.DateOfBegin > DateTime.UtcNow)
+{
+    <h3>
+        Edit
+        <span class="badge border border-blue text-blue mt-2">
+            <h3 class="m-0"> @Model.JobDto.Name.ToUpper() </h3>
+        </span>
+    </h3>
+
+    <div class="d-flex">
+        <form class="d-flex flex-sm-wrap justify-content-start flex-sm-row flex-column mt-3 gap-2"
+              style="flex: 1;" method="post" asp-page-handler="OnPostAsync">
+
+            <input type="hidden" name="Id" value="@Model.JobDto.Id" />
+            
+            <div class="form-floating mb-3 col-12 col-md-7 me-md-3">
+                <input type="text" aria-label="Name" class="form-control" name="Name" id="name" minlength="5" maxlength="30" value="@Model.JobDto.Name" required>
+                <label for="name">Job name</label>
+            </div>
+
+            <div class="col-md-4 ms-md-4 mb-3 col-12">
+                <div class="input-group">
+                    <div class="form-floating">
+                        <input type="number" aria-label="Salary" class="form-control" name="Salary" id="salary" min="1" aria-describedby="euro" value="@Model.JobDto.Salary" required>
+                        <label for="salary">Total salary</label>
+                    </div>
+                    <span class="input-group-text" id="euro">&#8364;</span>
+                </div>
+            </div>
+
+            <div class="form-floating mb-3 w-100">
+                <textarea class="w-100 form-control" id="description" name="Description" style="height: 20vh;" required>@Model.JobDto.Description</textarea>
+                <label for="description">Description</label>
+            </div>
+
+
+            <div class="form-floating mb-3 col-6 col-md-3 me-3 me-md-0">
+                <input type="number" class="form-control mb-3" name="Duration" id="duration" aria-label="duration" min="1" max="365" value="@Model.JobDto.Duration" required>
+                <label for="duration">Duration in days</label>
+            </div>
+
+            <div class="form-floating mb-3 col-5 col-md-3 me-md-2 ms-2 ms-md-0">
+                <input type="number" class="form-control mb-3" name="WorkSpots" id="spots" aria-label="spots" min="1" max="50" value="@Model.JobDto.WorkSpots" required>
+                <label for="spots">Available work spots</label>
+            </div>
+
+            <div class="form-floating mb-3 col-12 col-md-5 ms-md-4">
+                <input type="date" value="@Model.JobDto.DateOfBegin.ToString("yyyy-MM-dd")"
+                       min="@{
+                                var minDate = DateTime.Parse(DateTime.UtcNow.ToString(CultureInfo.CurrentCulture));
+                                @minDate.ToString("yyyy-MM-dd")
+                            }"
+                       class="form-control mb-3" name="date" id="date" aria-label="date" required/>
+                <label for="date">Date of begin</label>
+            </div>
+        
+            <button type="submit" class="btn btn-light-blue col-md-3">Submit</button>
+        </form>
+        <div class="d-none d-md-block" style="flex: 1;"></div>
+    </div>   
+}
+else
+{
+    <h3 class="text-secondary">Unable to update job that is already in progress</h3>
+}

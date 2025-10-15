@@ -1,0 +1,89 @@
+@page "/Jobs"
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Pages.Jobs.Index
+
+@{
+    ViewData["Title"] = "Jobs";
+    var jobs = Model.Jobs.ToList();
+}
+
+@if (jobs.Any())
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0">
+        @foreach (var job in jobs)
+        {
+            if (job?.Id == null) continue;
+            <div class="col">
+                <div class="card border-dark-blue text-center h-100 w-auto bg-white">
+                    <div class="card-header bg-white">
+                        <h4 class="card-title bg-white m-0">
+                            @job.Name.ToUpper()
+                        </h4>
+                    </div>
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-evenly">
+                            <div>
+                                <h5 class="card-text bg-white"> @job.DateOfBegin.ToString("d")</h5>
+                            </div>
+                            <div class="vr"></div>
+                            <div>
+                                <h5 class="card-text">@job.Duration DAYS</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.AverageRating.ContainsKey(job.Id))
+                    {
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-evenly">
+                                <div class="Stars" style="--rating: @Model.AverageRating[job.Id]">
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div class="card-text mt-2 mb-2">
+                            <span class="badge border border-warning text-dark">
+                                <h4 class="m-0">
+                                    @job.Salary &#8364;
+                                </h4>
+                            </span>
+                    </div>
+                    <div class="card-footer bg-white mt-2 mb-2 bg-white">
+                        <div class="d-flex flex-column">
+                            <div class="d-flex justify-content-around">
+                                <div>
+                                    <a class="btn btn-outline-dark" asp-page="/Jobs/Information"
+                                       asp-route-jobId="@job.Id">Information</a>
+                                </div>
+                                <div>
+                                    <a class="btn btn-outline-blue" asp-page="/Employers/Profile"
+                                       asp-route-employerId="@job.EmployerId">Employer</a>
+                                </div>
+                            </div>
+                                @if (Request.Cookies["userRole"] != null && Request.Cookies["userRole"] != "Employer")
+                                {
+                                    <div class="d-flex justify-content-center mt-3">
+                                        <a class="btn btn-outline-success position-relative" asp-page="/Jobs/Application"
+                                           asp-route-jobId="@job.Id">
+                                            Apply
+                                        </a>
+                                    </div>
+                                }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column align-items-center">
+        <div>
+            <span class="badge border border-warning position-relative mb-2 mt-5">
+                <h5 class="m-0 text-warning">There are no jobs on this site</h5>
+            </span>
+        </div>
+    </div>
+}
+

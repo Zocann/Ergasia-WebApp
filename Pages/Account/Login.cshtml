@@ -1,0 +1,15 @@
+@page
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Login
+@{
+    ViewData["Title"] = "Login";
+}
+
+@if (ViewData["LoggedIn"] is bool == false)
+{
+    <form class="d-flex justify-content-around flex-sm-row flex-column mt-3 gap-2" asp-controller="" asp-action="">
+        <input type="text" class="form-control" name="Email" placeholder="Email" aria-label="email">
+        <input type="password" class="form-control form-text" name="Password" placeholder="Password" aria-label="password"/>
+        <button type="submit" class="btn btn-light-blue">Login</button>
+    </form>
+}

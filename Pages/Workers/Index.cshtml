@@ -1,0 +1,58 @@
+@page "/Workers"
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Pages.Workers.Index
+
+@{
+    ViewData["Title"] = "Workers";
+    var workers = Model.Workers.ToList();
+}
+
+@if (workers.Any())
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0 mt-5">
+        @foreach (var worker in workers)
+        {
+            if (worker == null) break;
+            <div class="col">
+                <div class="card border-dark me-3 bg-white" style="width: 18rem;">
+                    <img class="card-img-top" src="
+                    @if (worker.PictureUrl != null) { @worker.PictureUrl } else { @("/images/NoProfilePicture.jpg") }"
+                         alt="Card image cap">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title">@worker.FirstName @worker.LastName</h5>
+                    </div>
+                    @if (Model.AverageRating.ContainsKey(worker.Id))
+                    {
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-evenly">
+                                <div class="Stars" style="--rating: @Model.AverageRating[worker.Id]">
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div class="card-body bg-white">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><b>State:</b> @worker.State</li>
+                            <li class="list-group-item"><b>Email:</b> @worker.Email</li>
+                        </ul> 
+                    </div>
+                    <div class="card-body d-flex justify-content-center bg-white">
+                        <a asp-page="/Workers/Profile" asp-route-workerId="@worker.Id"
+                           class="card-link link-underline-opacity-25 link-underline-opacity-100-hover">See
+                            profile</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column align-items-center">
+        <div>
+            <span class="badge border border-warning position-relative mb-2 mt-5">
+                <h5 class="m-0 text-warning">There are no workers on this site</h5>
+            </span>
+        </div>
+    </div>
+}

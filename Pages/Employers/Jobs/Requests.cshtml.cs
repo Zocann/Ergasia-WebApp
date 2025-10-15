@@ -1,0 +1,70 @@
+using Ergasia_WebApp.ApiRepositories.Interfaces;
+using Ergasia_WebApp.Data;
+using Ergasia_WebApp.DTOs.Job;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace Ergasia_WebApp.Pages.Employers.Jobs;
+
+public class Requests(IJobApiRepository jobApiRepository) : PageModel
+{
+    private ClientData _clientData = new ClientData(new HttpContextAccessor());
+    
+    [BindProperty(SupportsGet = true)]
+    public required string JobId { get; set; }
+
+    public required JobDto Job { get; set; }
+    public IEnumerable<JobRequestDto?>? JobRequests { get; set; } = [];
+    
+    public async Task<IActionResult> OnGetAsync()
+    {
+       if (!_clientData.GetAccessToken()) return Unauthorized();
+       if (!_clientData.GetId()) return RedirectToPage("/Error");
+       
+        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken!);
+        if (job == null)
+        {
+            if (Response.StatusCode == 401) return Unauthorized();
+            return RedirectToPage("Error");
+        }
+        Job = job;
+        
+        var jobRequests = await jobApiRepository.GetJobRequestsByJobIdAsync(JobId, _clientData.Id!, _clientData.AccessToken!);
+        
+        JobRequests = jobRequests;
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostAsync(string workerId, string method)
+    {
+        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (!_clientData.GetId()) return RedirectToPage("/Error");
+
+        switch (method)
+        {
+            case "post": 
+                var workerJob = await jobApiRepository.PostWorkerJobAsync(JobId, _clientData.Id, workerId, _clientData.AccessToken!);
+
+                if (workerJob == null)
+                {
+                    if (Response.StatusCode == 401) return Unauthorized();
+                    return RedirectToPage("/Error");
+                }
+
+                return RedirectToAction(nameof(OnGetAsync));
+            
+            case "delete":
+                var deleted = await jobApiRepository.DeleteJobRequest(JobId, _clientData.Id!, workerId, _clientData.AccessToken!);
+                if (!deleted)
+                {
+                    if (Response.StatusCode == 401) return Unauthorized();
+                    return RedirectToPage("/Error");
+                }
+
+                return RedirectToAction(nameof(OnGetAsync));
+            
+            default:
+                return RedirectToPage("/Error");
+        }
+    }
+}

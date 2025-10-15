@@ -1,0 +1,334 @@
+@page
+@using Ergasia_WebApp.DTOs.User
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Account.Index
+
+@{
+    ViewData["Title"] = "Account";
+
+    UserDto? user = null;    
+
+    if (Model.Worker == null)
+    {
+        if (Model.Employer != null)
+        {
+            user = Model.Employer;
+        }
+    }
+    else
+    {
+        user = Model.Worker;
+    }
+}
+@if (user != null)
+{
+    <div class="d-flex flex-row">
+        <div class="d-flex flex-column flex-lg-row" style="flex: 1;">
+            <div class="d-flex flex-column flex-lg-row align-items-center mb-5" style="flex: 3;">
+
+                <div class="d-flex justify-content-center" style="flex: 1; max-width: 75%;">
+                    <img src="@user.PictureUrl" alt="@user.Email" class="img-thumbnail rounded-1" style="object-fit: contain;">
+                </div>
+
+                <div class="d-flex align-items-center" style="flex: 1;">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <h3>@user.FirstName @user.LastName</h3>
+                        </li>
+                        <li class="list-group-item">
+                            <h4>@(DateTime.UtcNow.Year - user.DateOfBirth.Year)</h4>
+                        </li>
+                        <li class="list-group-item">
+                            @if (user.IsActive)
+                            {
+                                <i>Active on this site since @user.DateOfRegistration.ToString("d")</i>
+                            }
+                            else
+                            {
+                                <h4 class="text-">This employer is inactive</h4>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div style="flex: 1;"></div>
+            <div class="d-flex flex-column" style="flex: 3;">
+            @if (Model.Worker != null)
+            {
+                <div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item" style="text-align: center;">
+                            <h5>Worker information</h5>
+                        </li>
+                        @if (Model.Worker.MinimalSalary == null)
+                        {
+                            <li class="list-group-item">
+                                <h6 class="text-danger">No minimal salary</h6>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex flex-row">
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                        Minimal salary
+                                    </div>
+                                    <div class="vr">
+                                    </div>
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                        <b>@Model.Worker.MinimalSalary&#8364;</b>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                        @if (Model.Worker.Description == null)
+                        {
+                            <li class="list-group-item">
+                                <h6 class="text-danger">No description</h6>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex flex-row align-items-center">
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                        Description
+                                    </div>
+                                    <div class="vr">
+                                    </div>
+                                    <div class="d-flex justify-content-center" style="flex: 1;">
+                                        <p class="m-0 ps-3">@Model.Worker.Description</p>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+            @if (Model.Employer != null)
+            {
+                <div style="flex: 1;">
+                    <ul class="list-group list-group-flush" style="text-align: center;">
+                        <li class="list-group-item">
+                            <h5>Employer information</h5>
+                        </li>
+                        @if (Model.Employer.CompanyName == null)
+                        {
+                            <li class="list-group-item">
+                                <h6 class="text-danger">No company name added</h6>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex flex-row">
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                        Name
+                                    </div>
+                                    <div class="vr">
+                                    </div>
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                       <b>@Model.Employer.CompanyName.ToUpper()</b>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                        @if (Model.Employer.CompanyState == null)
+                        {
+                            <li class="list-group-item">
+                                <h6 class="text-danger">No company state added</h6>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex flex-row">
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                        State
+                                    </div>
+                                    <div class="vr">
+                                    </div>
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                        <b>@Model.Employer.CompanyState.ToUpper()</b>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                        @if (Model.Employer.CompanyCity == null)
+                        {
+                            <li class="list-group-item">
+                                <h6 class="text-danger">No company city added</h6>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex flex-row">
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                        City
+                                    </div>
+                                    <div class="vr">
+                                    </div>
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                        <b>@Model.Employer.CompanyCity.ToUpper()</b>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                        @if (Model.Employer.CompanyAddress == null)
+                        {
+                            <li class="list-group-item">
+                                <h6 class="text-danger">No company address added</h6>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex flex-row">
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                        Address
+                                    </div>
+                                    <div class="vr">
+                                    </div>
+                                    <div class="d-flex justify-content-around" style="flex: 1;">
+                                        <b>@Model.Employer.CompanyAddress.ToUpper()</b>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+            <div style="flex: 1;">
+                
+            </div>
+            <div style="flex: 1;">
+                <ul class="list-group list-group-flush mt-5">
+                    <li class="list-group-item" style="text-align: center;">
+                        <h5>Personal information</h5>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex flex-row">
+                            <div class="d-flex justify-content-around" style="flex: 1;">
+                                State
+                            </div>
+                            <div class="vr">
+                            </div>
+                            <div class="d-flex justify-content-around" style="flex: 1;">
+                                <b>@user.State.ToUpper()</b>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex flex-row">
+                            <div class="d-flex justify-content-around" style="flex: 1;">
+                                City
+                            </div>
+                            <div class="vr">
+                            </div>
+                            <div class="d-flex justify-content-around" style="flex: 1;">
+                                <b>@user.City.ToUpper()</b>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex flex-row">
+                            <div class="d-flex justify-content-around" style="flex: 1;">
+                                Address
+                            </div>
+                            <div class="vr">
+                            </div>
+                            <div class="d-flex justify-content-around" style="flex: 1;">
+                                <b>@user.Address.ToUpper()</b>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.EmployerRatings.Any())
+{
+    <div class="mt-5 mb-3 ms-2">
+        <span class="badge border border-warning text-dark">
+            <h4 class="m-0">
+                Ratings
+            </h4>
+        </span>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0">
+        @foreach (var rating in Model.EmployerRatings)
+        {
+            if (rating == null) continue;
+            <div class="col">
+                <div class="card border-dark-blue text-center h-100 w-auto">
+                    <div class="card-header bg-white">
+                        <h4 class="card-title bg-white m-0">
+                            @rating.WorkerDto.FirstName @rating.WorkerDto.LastName.ToUpper()
+                        </h4>
+                    </div>
+                    <div class="card-text bg-white">
+                        <div class="Stars" style="--rating: @rating.NumericalRating;">
+                        </div>
+                    </div>
+                    @if (rating.VerbalRating != null)
+                    {
+                        <div class="card-text bg-white">
+                            @rating.VerbalRating
+                        </div>
+                    }
+                    <div class="card-footer bg-white">
+                        <a class="btn btn-outline-dark" asp-page="/Workers/Profile"
+                           asp-route-workerId="@rating.WorkerDto.Id">See profile</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+else if (Model.WorkerRatings.Any())
+{
+    {
+        <div class="mt-5 mb-3 ms-2">
+            <span class="badge border border-warning text-dark">
+                <h4 class="m-0">
+                    Ratings
+                </h4>
+            </span>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0">
+            @foreach (var rating in Model.WorkerRatings)
+            {
+                if (rating == null) continue;
+                <div class="col">
+                    <div class="card border-dark-blue text-center h-100 w-auto">
+                        <div class="card-header bg-white">
+                            <h4 class="card-title bg-white m-0">
+                                @rating.EmployerDto.FirstName @rating.EmployerDto.LastName.ToUpper()
+                            </h4>
+                        </div>
+                        <div class="card-text bg-white">
+                            <div class="Stars" style="--rating: @rating.NumericalRating;">
+                            </div>
+                        </div>
+                        @if (rating.VerbalRating != null)
+                        {
+                            <div class="card-text bg-white">
+                                @rating.VerbalRating
+                            </div>
+                        }
+                        <div class="card-footer bg-white">
+                            <a class="btn btn-outline-dark" asp-page="/Workers/Profile"
+                               asp-route-workerId="@rating.WorkerDto.Id">See profile</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+

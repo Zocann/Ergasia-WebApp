@@ -1,0 +1,82 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] - Ergasia</title>
+    <script type="importmap"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=Train+One&display=swap"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/main.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/star-rating.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/stars.css" asp-append-version="true">
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-md navbar-toggleable-md navbar-dark bg-dark-blue border-bottom box-shadow">
+        <div class="container">
+            <a class="navbar-brand" asp-area="" asp-page="/Index">Ergasia</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse d-md-inline-flex justify-content-between">
+
+                <div class="d-flex d-md-none w-100 gap-3 mt-3">
+                    <a class="btn btn-light flex-fill" asp-page="/Account/Login">Login</a>
+                    <a class="btn btn-light-blue flex-fill" asp-page="/Account/Register">Register</a>
+                </div>
+            </div>
+
+            <div class="d-none d-md-flex gap-4 align-items-center">
+                <form class="d-flex justify-content-around flex-md-row flex-column gap-2"
+                      asp-page="/Account/Login" method="POST">
+                    <input type="text" class="form-control" name="email" placeholder="Email" aria-label="Email">
+                    <input type="password" class="form-control" name="password" placeholder="Password"
+                           aria-label="Password"/>
+                    <button type="submit" class="btn btn-light-blue">Login</button>
+                </form>
+                <a class="nav-link text-light-blue" asp-page="/Account/Register">Register</a>
+            </div>
+        </div>
+    </nav>
+</header>
+<div class="h-auto bg-danger-subtle text-dark w-100 d-flex" id="warning">
+    <p class="m-0 p-2" style="text-align: center">
+        This site is for demonstration purposes only.
+        Please do not insert any sensitive data!
+        This site is <b>NOT RESPONSIBLE</b> for potential security breaches.
+    </p>
+    <button type="button" class="btn-close btn-close-dark me-2 m-auto" id="closeWarning"
+            aria-label="Close" onclick="closeWarning()"></button>
+</div>
+<div class="container">
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+</div>
+
+<footer class="border-top footer text-muted position-absolute w-100">
+    <div class="container">
+        &copy; 2025 - Ergasia - <a asp-area="" asp-page="/Privacy">Privacy</a>
+    </div>
+</footer>
+
+<script src="~/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/star-rating.js"></script>
+<script>
+    function closeWarning() {
+        document.getElementById('warning').style.visibility = 'hidden';
+    }
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

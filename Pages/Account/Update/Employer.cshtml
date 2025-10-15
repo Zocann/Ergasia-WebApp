@@ -1,0 +1,129 @@
+@page "/Account/{employerId}/Employer/Update"
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Pages.Account.Update.Employer
+
+@{
+    ViewData["Title"] = "Update";
+    var employer = Model.EmployerDto;
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="toast-container p-3 top-0 start-50 translate-middle-x">
+        <div id="formToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+             aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @Model.Error
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    Model.Error = null;
+}
+
+<div>
+    <form style="flex: 1;" method="post" asp-page-handler="OnPostAsync">
+        <input type="hidden" name="Id" value="@employer.Id"/>
+        <div class="d-flex flex-column flex-md-row">
+
+            <div class="d-flex flex-sm-wrap justify-content-start flex-sm-row flex-column mt-3 gap-2" style="flex: 1;">
+                <div class="w-100 mb-3">
+                    <h4>Personal information</h4>
+                </div>
+                <div class="form-floating mb-3 col-md-5">
+                    <input type="text" aria-label="First name" class="form-control" name="FirstName" id="fname"
+                           value="@employer.FirstName" required minlength="3" maxlength="20">
+                    <label for="fname">First name</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-6">
+                    <input type="text" aria-label="Last name" class="form-control" name="LastName" id="lname"
+                           value="@employer.LastName" required minlength="3" maxlength="20">
+                    <label for="lname">Last name</label>
+                </div>
+
+
+                <div class="form-floating mb-3 col-md-5">
+                    <input type="email" class="form-control mb-3" name="Email" id="email" aria-label="email"
+                           value="@employer.Email" readonly="readonly">
+                    <label for="email">Email</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-6">
+                    <input type="tel" class="form-control mb-3" name="PhoneNumber" id="phone" aria-label="phone"
+                           value="@employer.PhoneNumber" required minlength="9" maxlength="17">
+                    <label for="phone">Phone</label>
+                </div>
+
+
+                <div class="form-floating mb-3 col-md-5">
+                    <input type="text" class="form-control mb-3" name="State" id="state" aria-label="state"
+                           value="@employer.State" required minlength="3" maxlength="20">
+                    <label for="state">State</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-6">
+                    <input type="text" class="form-control mb-3" name="City" id="city" aria-label="city"
+                           value="@employer.City" required minlength="3" maxlength="20">
+                    <label for="city">City</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-8">
+                    <input type="text" class="form-control mb-3" name="Address" id="address" aria-label="address"
+                           value="@employer.Address" required minlength="3" maxlength="20">
+                    <label for="address">Address</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-4">
+                    <input type="date" class="form-control mb-3" name="date" id="date" aria-label="date"
+                           value="@employer.DateOfBirth.ToString("yyyy-MM-dd")" readonly="readonly">
+                    <label for="date">Date of birth</label>
+                </div>
+            </div>
+
+            <div
+                class="d-flex flex-sm-wrap justify-content-start flex-sm-row flex-column mt-3 gap-2 align-content-start"
+                style="flex: 1;">
+                <div class="w-100 mb-3">
+                    <h4>Company information</h4>
+                </div>
+                <div class="form-floating mb-3 col-md-8">
+                    <input type="text" class="form-control mb-3" name="CompanyName" id="compName" aria-label="compName"
+                           value="@employer.CompanyName" required minlength="3" maxlength="20">
+                    <label for="compName">Company Name</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-5">
+                    <input type="text" class="form-control mb-3" name="CompanyState" id="cState" aria-label="state"
+                           value="@employer.CompanyState" required minlength="3" maxlength="20">
+                    <label for="cState">State</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-6">
+                    <input type="text" class="form-control mb-3" name="CompanyCity" id="cCity" aria-label="city"
+                           value="@employer.CompanyCity" required minlength="3" maxlength="20">
+                    <label for="cCity">City</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-8">
+                    <input type="text" class="form-control mb-3" name="CompanyAddress" id="cAddress"
+                           aria-label="address"
+                           value="@employer.CompanyAddress" required minlength="3" maxlength="20">
+                    <label for="cAddress">Address</label>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-light-blue">Update</button>
+    </form>
+</div>
+
+<script>
+    window.onload = (event) => {
+        var formToast = document.getElementById('formToast')
+        var toastForm = new bootstrap.Toast(formToast);
+        toastForm.show()
+    }
+</script>

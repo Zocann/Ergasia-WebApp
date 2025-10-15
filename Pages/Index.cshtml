@@ -1,0 +1,105 @@
+﻿@page
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+    var jobs = Model.Jobs;
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="toast-container p-3 top-0 start-50 translate-middle-x">
+        <div id="formToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+             aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @Model.Error
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    Model.Error = null;
+}
+
+<div class="text-start">
+    <h1 class="display-1 text-blue alternate-font" style="margin-left: -1vw;">Ergasia</h1>
+    <h2 class="text-dark mb-3 alternate-font">Working abroad made easier.</h2>
+</div>
+
+
+<div>
+    @if (jobs.Any())
+    {
+        <div class="mt-5 border border-secondary rounded shadow-lg s p-3">
+            <div style="text-align: center;">
+                <h3>
+                    Find your job from the best rated employers
+                </h3>
+            </div>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 mt-3 ms-md-0 me-md-0">
+                @foreach (var job in jobs)
+                {
+                    if (job?.Id == null) continue;
+                    <div class="col">
+                        <div class="card border-dark-blue text-center h-100 w-auto">
+                            <div class="card-header bg-white">
+                                <h4 class="card-title bg-white m-0">
+                                    @job.Name.ToUpper()
+                                </h4>
+                            </div>
+                            <div class="card-header bg-white">
+                                <div class="d-flex justify-content-evenly">
+                                    <div>
+                                        <h5 class="card-text bg-white"> @job.DateOfBegin.ToString("d")</h5>
+                                    </div>
+                                    <div class="vr"></div>
+                                    <div>
+                                        <h5 class="card-text">@job.Duration DAYS</h5>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (true)
+                            {
+                                <div class="card-header bg-white">
+                                    <div class="d-flex justify-content-evenly">
+                                        <div class="Stars" style="--rating: @Model.AverageRatings[job.Id]">
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="card-text mt-2 mb-2">
+                                <span class="badge border border-warning text-dark">
+                                    <h4 class="m-0">
+                                        @job.Salary &#8364;
+                                    </h4>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+
+<div class="mt-5">
+        <i>
+            This site was created for demonstration purposes only.<br/>
+            For source code please check out <a class="link link-warning link-underline-opacity-25 link-underline-opacity-100-hover" href="#">Github repository</a>.<br/>
+            <a asp-page="/Information">More information about this site</a>
+        </i>
+</div>
+
+
+<script>
+    window.onload = (event) => {
+        var formToast = document.getElementById('formToast')
+        var toastForm = new bootstrap.Toast(formToast);
+        toastForm.show()
+    }
+</script>
+

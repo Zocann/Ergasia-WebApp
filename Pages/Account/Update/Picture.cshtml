@@ -1,0 +1,23 @@
+@page
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Picture
+
+@{
+    ViewData["Title"] = "Update picture";
+}
+
+<h5>Upload picture</h5>
+
+<form method="post" enctype="multipart/form-data" class="mt-3" asp-page-handler="OnPostAsync">
+    <input type="file" name="file" id="file" accept="image/*" class="form-control">
+
+    @if (Model.Errors.Any())
+    {
+        foreach (var error in Model.Errors)
+        {
+            <p class="text-danger">@error</p>
+        }
+    }
+
+    <button type="submit" class="btn btn-light-blue mt-3">Submit</button>
+</form>

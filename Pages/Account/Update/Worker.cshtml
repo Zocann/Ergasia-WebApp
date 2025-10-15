@@ -1,0 +1,120 @@
+@page "/Account/{workerId}/Worker/Update"
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Pages.Account.Update.Worker
+
+@{
+    ViewData["Title"] = "Update";
+    var worker = Model.WorkerDto;
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="toast-container p-3 top-0 start-50 translate-middle-x">
+        <div id="formToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+             aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @Model.Error
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    Model.Error = null;
+}
+
+<div>
+    <form style="flex: 1;" method="post" asp-page-handler="OnPostAsync">
+        <input type="hidden" name="Id" value="@worker.Id" />
+        <div class="d-flex flex-column flex-md-row">
+
+            <div class="d-flex flex-sm-wrap justify-content-start flex-sm-row flex-column mt-3 gap-2" style="flex: 1;">
+                <div class="w-100 mb-3">
+                    <h4>Personal information</h4>
+                </div>
+                <div class="form-floating mb-3 col-md-5">
+                    <input type="text" aria-label="First name" class="form-control" name="FirstName" id="fname"
+                           value="@worker.FirstName" required minlength="3" maxlength="20">
+                    <label for="fname">First name</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-6">
+                    <input type="text" aria-label="Last name" class="form-control" name="LastName" id="lname"
+                           value="@worker.LastName" required minlength="3" maxlength="20">
+                    <label for="lname">Last name</label>
+                </div>
+
+
+                <div class="form-floating mb-3 col-md-5">
+                    <input type="email" class="form-control mb-3" name="Email" id="email" aria-label="email"
+                           value="@worker.Email" readonly="readonly">
+                    <label for="email">Email</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-6">
+                    <input type="tel" class="form-control mb-3" name="PhoneNumber" id="phone" aria-label="phone"
+                           value="@worker.PhoneNumber" required minlength="9" maxlength="17">
+                    <label for="phone">Phone</label>
+                </div>
+
+
+                <div class="form-floating mb-3 col-md-5">
+                    <input type="text" class="form-control mb-3" name="State" id="state" aria-label="state"
+                           value="@worker.State" required minlength="3" maxlength="20">
+                    <label for="state">State</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-6">
+                    <input type="text" class="form-control mb-3" name="City" id="city" aria-label="city"
+                           value="@worker.City" required minlength="3" maxlength="20">
+                    <label for="city">City</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-8">
+                    <input type="text" class="form-control mb-3" name="Address" id="address" aria-label="address"
+                           value="@worker.Address" required minlength="3" maxlength="20">
+                    <label for="address">Address</label>
+                </div>
+
+                <div class="form-floating mb-3 col-md-4">
+                    <input type="date" class="form-control mb-3" name="date" id="date" aria-label="date"
+                           value="@worker.DateOfBirth.ToString("yyyy-MM-dd")" readonly="readonly">
+                    <label for="date">Date of birth</label>
+                </div>
+            </div>
+
+            <div
+                class="d-flex flex-sm-wrap justify-content-start flex-sm-row flex-column mt-3 gap-2 align-content-start"
+                style="flex: 1;">
+                <div class="w-100 mb-3">
+                    <h4>Worker information</h4>
+                </div>
+
+                <div class="col-md-4 mb-3 col-12">
+                    <div class="input-group">
+                        <div class="form-floating">
+                            <input type="number" aria-label="Minimal Salary" class="form-control" name="MinimalSalary" id="salary" min="1" aria-describedby="euro" required value="@worker.MinimalSalary">
+                            <label for="salary">Minimal Salary</label>
+                        </div>
+                        <span class="input-group-text" id="euro">&#8364;</span>
+                    </div>
+                </div>
+
+                <div class="form-floating mb-3 w-100">
+                    <textarea class="w-100 form-control" id="description" name="Description" style="height: 20vh;" required>@worker.Description</textarea>
+                    <label for="description">Description</label>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-light-blue">Update</button>
+    </form>
+</div>
+
+<script>
+    window.onload = (event) => {
+        var formToast = document.getElementById('formToast')
+        var toastForm = new bootstrap.Toast(formToast);
+        toastForm.show()
+    }
+</script>

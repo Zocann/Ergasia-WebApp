@@ -1,0 +1,20 @@
+﻿@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    Layout = "_Layout";
+    
+    if (HttpContextAccessor != null && HttpContextAccessor.HttpContext != null)
+    {
+        foreach (var cookie in HttpContextAccessor.HttpContext.Request.Cookies)
+        {
+            if (@cookie.Key != "refreshToken")
+            {
+                continue;
+            }
+
+            Layout = "_Layout-logged";
+            break;
+        }
+        
+    }
+}

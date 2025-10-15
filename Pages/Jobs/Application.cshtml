@@ -1,0 +1,100 @@
+@page "/Jobs/{jobId}/Application"
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Application
+
+@{
+    ViewData["Title"] = "Job application";
+}
+
+<h3>
+    Application for
+    <span class="badge text-blue border border-1 border-blue mt-2 mb-5">
+        <h3 class="m-0"> @Model.JobDto.Name.ToUpper() </h3>
+    </span>
+</h3>
+
+<div class="d-flex mt-4">
+    <div style="flex:1;">
+        <table class="table" style="border-color: rgb(187, 225, 250);">
+            <tr>
+                <th scope="row"><h4 class="m-0">DESCRIPTION</h4></th>
+                <td><h5 class="m-0">@Model.JobDto.Description</h5></td>
+            </tr>
+            <tr>
+                <th scope="row"><h4 class="m-0">WORKERS</h4></th>
+                <td>
+                    <h5 class="m-0">@Model.JobDto.WorkSpots</h5>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row"><h4 class="m-0">DATE OF BEGIN</h4></th>
+                <td><h5 class="m-0">@{
+                            @Model.JobDto.DateOfBegin.ToString("D")
+                        }
+                    </h5></td>
+            </tr>
+
+        </table>
+    </div>
+    <div class="d-none d-md-block" style="flex: 1"></div>
+</div>
+
+<div class="mt-5">
+    @if (Model.JobDto.DateOfBegin.AddDays(Model.JobDto.Duration) < DateTime.UtcNow)
+    {
+        <span class="badge bg-secondary mb-2">
+        <h5 class="m-0">This job has already finished</h5>
+    </span>
+        <br/>
+        <a class="text-blue" asp-page="/Jobs/Index">See more jobs</a>
+    }
+    else if (Model.JobDto.DateOfBegin > DateTime.UtcNow)
+    {
+        @if (Model.WorkerJob != null)
+        {
+            <span class="badge bg-success mb-2">
+            <h5 class="m-0">You are already applied to this job</h5>
+        </span>
+            <br/>
+            <a class="text-blue" asp-page="/Jobs/Index">See more jobs</a>
+        }
+        else if (Model.JobRequest != null)
+        {
+            <span class="badge bg-warning position-relative mb-2">
+            <h5 class="m-0">Waiting for employers response</h5>
+        </span>
+            <br/>
+            <a class="text-blue" asp-page="/Jobs/Index">See more jobs</a>
+        }
+        else
+        {
+            <span class="badge bg-light-blue mb-2">
+            <h4 class="m-0">Application form:</h4>
+        </span>
+
+            <div class="d-flex">
+                <form method="post" asp-page-handler="OnPostAsync" style="flex: 1;">
+                    <div class="form-floating mb-3 w-100">
+                        <textarea class="w-100 form-control" id="message" name="message"
+                                  style="height: 20vh;"></textarea>
+                        <label for="message">Message</label>
+                    </div>
+                    <button type="submit" class="btn btn-light-blue col-md-3 text-dark">Apply</button>
+                </form>
+                <div class="d-none d-md-block" style="flex: 1;"></div>
+            </div>
+        }
+    }
+    else
+    {
+        <span class="badge bg-success mb-2">
+        <h5 class="m-0">This job is already in progress</h5>
+    </span>
+        <br/>
+        <a class="text-blue" asp-page="/Jobs/Index">See more jobs</a>
+    }
+
+</div>
+
+
+

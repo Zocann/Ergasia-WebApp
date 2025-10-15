@@ -1,0 +1,68 @@
+@page "/MyJobs/{jobId}/Requests"
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Requests
+
+@{
+    ViewData["Title"] = "Job requests";
+}
+@if (Model.Job.DateOfBegin.AddDays(Model.Job.Duration) < DateTime.UtcNow)
+{
+    <h3 class="text-secondary mt-5">Unable to hire workers for finished job</h3>
+}
+else if (Model.JobRequests != null && Model.JobRequests.Any())
+{
+    <h3>
+        Applications for
+        <span class="badge text-blue border border-1 border-blue mt-1 mb-5">
+            <h3 class="m-0"> @Model.Job.Name.ToUpper() </h3>
+        </span>
+    </h3>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0">
+        @foreach (var jobRequest in Model.JobRequests.TakeWhile(jobRequest => jobRequest != null))
+        {
+            if (jobRequest == null) break;
+            <div class="col">
+                <div class="card text-center text-md-start border-dark h-100">
+                    <img class="card-img-top" src="@if (jobRequest.WorkerDto.PictureUrl != null) { @jobRequest.WorkerDto.PictureUrl } else { @("/images/NoProfilePicture.jpg") }" alt="Card image cap"
+                         style="object-fit: contain;">
+                    <div class="card-body">
+                        <h5 class="card-title">@jobRequest.WorkerDto.FirstName @jobRequest.WorkerDto.LastName</h5>
+                        <h3 class="card-title">@(DateTime.UtcNow.Year - jobRequest.WorkerDto.DateOfBirth.Year)</h3>
+                        <p class="card-text">@if (jobRequest.Message != null)
+                            {
+                                <span>Message:</span>
+                                @jobRequest.Message
+                            }
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-around mb-2">
+                            <form id="post-@jobRequest.WorkerDto.Id" method="post" asp-page-handler="OnPostAsync">
+                                <input type="hidden" name="workerId" value="@jobRequest.WorkerDto.Id"/>
+                                <input type="hidden" name="method" value="post"/>
+                                <button class="btn btn-outline-success" form="post-@jobRequest.WorkerDto.Id" type="submit">Hire</button>
+                            </form>
+                            <form id="delete-@jobRequest.WorkerDto.Id" method="post" asp-page-handler="OnPostAsync">
+                                <input type="hidden" name="workerId" value="@jobRequest.WorkerDto.Id"/>
+                                <input type="hidden" name="method" value="delete"/>
+                                <button class="btn btn-outline-danger" form="delete-@jobRequest.WorkerDto.Id" type="submit">Dismiss</button>
+                            </form>
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <a href=" @("https://localhost:7135/Workers/" + jobRequest.WorkerDto.Id)"
+                               class="card-link link-blue link-underline-opacity-25 link-underline-opacity-100-hover">See profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <span class="badge bg-warning position-relative mb-2 mt-5">
+        <h5 class="m-0 text-dark">No worker applications</h5>
+    </span>
+    <br/>
+    <a class="text-blue" asp-page="/Workers/Index">Contact workers</a>
+}

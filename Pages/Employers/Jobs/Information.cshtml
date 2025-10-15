@@ -1,0 +1,163 @@
+@page "/MyJobs/{jobId}/Profile"
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Information
+
+@{
+    ViewData["Title"] = "Job information";
+
+    var dateOfBegin = Model.JobDto.DateOfBegin;
+    var currentDate = DateTime.UtcNow;
+
+    var years = dateOfBegin.Year - currentDate.Year;
+    int months;
+    int days;
+
+    if (years == 0) months = dateOfBegin.Month - currentDate.Month;
+    else months = 12 - currentDate.Month + dateOfBegin.Month;
+
+    if ((dateOfBegin.Day - currentDate.Day) <= 0)
+    {
+        months -= 1;
+        days = dateOfBegin.Day + DateTime.DaysInMonth(dateOfBegin.Year, dateOfBegin.Month) - currentDate.Day;
+    }
+    else days = dateOfBegin.Day - currentDate.Day;
+
+    if (dateOfBegin.Month - currentDate.Month <= 0) years -= 1;
+    if (months >= 12) months -= 12;
+}
+<div class="d-flex flex-column justify-content-center align-items-center gap-2">
+
+    <div class="position-relative" style="width: fit-content">
+        <div>
+            <span class="badge text-blue border border-1 border-blue mt-1">
+                <h2 class="m-0"> @Model.JobDto.Name.ToUpper() </h2>
+            </span>
+        </div>
+
+
+
+        @if (dateOfBegin > currentDate)
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning"> In
+                @if (years > 0)
+                {
+                    @(years + " year ")
+                }
+
+                @if (months > 0)
+                {
+                    @(months + " months ")
+                }
+
+                @if (days > 0)
+                {
+                    @(days + " days ")
+                }
+            </span>
+        }
+        else if (dateOfBegin.AddDays(Model.JobDto.Duration) > currentDate)
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+                @("Currently in progress")
+            </span>
+        }
+        else
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
+                @("Finished")
+            </span>
+        }
+    </div>
+
+    @if (dateOfBegin > currentDate)
+    {
+        <div>
+            <a class="btn btn-blue text-white" asp-page="/Employers/Jobs/Update"
+               asp-route-jobId="@Model.JobDto.Id">Edit</a>
+        </div>
+    }
+
+</div>
+
+
+
+<div class="d-flex mt-5">
+    <div style="flex:1">
+        <table class="table table-borderless">
+            <tr class="mb-5">
+                <th scope="row"><h4 class="m-0">MONTHLY SALARY</h4></th>
+                <td><h5 class="m-0">@Model.JobDto.Salary &#8364;</h5></td>
+            </tr>
+            <tr class="mb-5">
+                <th scope="row"><h4 class="m-0">DESCRIPTION</h4></th>
+                <td><h5 class="m-0">@Model.JobDto.Description</h5></td>
+            </tr>
+            <tr class="mt-5">
+                <th scope="row"><h4 class="m-0">WORKERS</h4></th>
+                <td>
+                    <h5 class="m-0">@(Model.JobDto.WorkSpots - Model.WorkSpots) / @Model.JobDto.WorkSpots</h5>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">
+                    <h4 class="m-0">DATE OF BEGIN</h4>
+                </th>
+                <td>
+                    <h5 class="m-0">
+                        @{
+                            @Model.JobDto.DateOfBegin.ToString("D")
+                        }
+                    </h5></td>
+            </tr>
+
+        </table>
+    </div>
+    <div style="flex: 1"></div>
+</div>
+
+@if (Model.WorkerJobs != null && Model.WorkerJobs.Any())
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0 mt-5">
+        @foreach (var job in Model.WorkerJobs)
+        {
+            if (job == null) break;
+            <div class="col">
+                <div class="card border-dark me-3" style="width: 18rem;">
+                    <img class="card-img-top"
+                         src="@if (job.WorkerDto.PictureUrl != null) { @job.WorkerDto.PictureUrl }else { @("/images/NoProfilePicture.jpg") }"
+                         alt="Card image cap">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><b>State:</b> @job.WorkerDto.State</li>
+                        <li class="list-group-item"><b>Email:</b> @job.WorkerDto.Email</li>
+                    </ul>
+                    <div class="card-body d-flex justify-content-evenly align-items-center">
+                        <div>
+                            <a asp-page="/Workers/Profile" asp-route-workerId="@job.WorkerDto.Id"
+                               class="card-link link-underline-opacity-25 link-underline-opacity-100-hover">See
+                                profile</a>
+                        </div>
+                        @if (job.JobDto.DateOfBegin.AddDays(Model.JobDto.Duration) < currentDate)
+                        {
+                            <a class="btn btn-outline-warning" asp-page="/Workers/AddReview" asp-route-workerId="@job.WorkerDto.Id">Rate</a>
+                        }
+                    </div>
+                                
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column align-items-center">
+        <div>
+            <span class="badge border border-warning position-relative mb-2 mt-5">
+                <h5 class="m-0 text-warning">No current workers</h5>
+            </span>
+        </div>
+        <div class="d-flex">
+            <a class="link-blue link-underline-opacity-25 link-underline-opacity-100-hover" asp-page="/Workers/Index">Contact
+                workers</a>
+        </div>
+    </div>
+}
