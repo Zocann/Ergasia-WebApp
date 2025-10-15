@@ -6,6 +6,9 @@ using Ergasia_WebApp.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(policy =>
+    policy.AddDefaultPolicy(p => p.WithOrigins("*")));
+
 // Add services to the container.
 builder.Services.AddRazorPages();
 
