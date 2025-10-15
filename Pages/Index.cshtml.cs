@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages;
 
+[IgnoreAntiforgeryToken]
 public class IndexModel(IJobApiRepository jobApiRepository, IRatingApiRepository ratingApiRepository) : PageModel
 {
     public List<JobDto> Jobs { get; set; } = [];
