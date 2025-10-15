@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Account;
 
+[IgnoreAntiforgeryToken]
 public class Register(IUserApiRepository userApiRepository, ICookieService cookieService)
     : PageModel
 {
