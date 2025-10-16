@@ -145,56 +145,7 @@
 </header>
 <div class="container">
     <main role="main" class="pb-3">
-        
         @RenderBody()
-
-        @if (Context.Request.Cookies["userRole"] != null)
-        {
-            if (Context.Request.Cookies["userRole"] == "Employer")
-            {
-                <!-- Mobile view -->
-                <div class="d-flex d-md-none position-fixed w-100 justify-content-evenly z-3" style="bottom: 20px;">
-                    <div
-                        class="border border-3 border-dark-blue rounded-3 d-flex justify-content-center align-items-center"
-                        style="width: 75px; height:  75px;">
-                        <a asp-page="/Employers/Jobs/Add">
-                            <i class="fa fa-solid fa-plus fa-4x" style="color: rgb(15, 76, 117);"></i>
-                        </a>
-
-                    </div>
-                    <div
-                        class="border border-3 border-dark-blue rounded-3 d-flex justify-content-center align-items-center"
-                        style="width: 75px; height:  75px;">
-                        <a asp-page="/Employers/Jobs/Index">
-                            <i class="fa fa-solid fa-briefcase fa-3x" style="color: rgb(15, 76, 117);"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Large view -->
-                <div class="d-none d-md-flex flex-column position-fixed justify-content-evenly z-3"
-                     style="right: 0; bottom:  0; height:  30%; width:  8%;">
-                    <div
-                        class="border border-3 border-dark-blue rounded-3 d-flex justify-content-center align-items-center"
-                        style="width: 90px; height:  90px;">
-                        <a asp-page="/Employers/Jobs/Add">
-                            <i class="fa fa-solid fa-plus fa-5x" style="color: rgb(15, 76, 117);"></i>
-                        </a>
-
-                    </div>
-                    <div
-                        class="border border-3 border-dark-blue rounded-3 d-flex justify-content-center align-items-center"
-                        style="width: 90px; height:  90px;">
-                        <a asp-page="/Employers/Jobs/Index">
-                            <i class="fa fa-solid fa-briefcase fa-4x" style="color: rgb(15, 76, 117);"></i>
-                        </a>
-                    </div>
-                </div>
-            }
-            else if (Context.Request.Cookies["userRole"] == "Worker")
-            {
-            }
-        }
     </main>
 </div>
 
