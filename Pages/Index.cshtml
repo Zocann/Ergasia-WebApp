@@ -61,15 +61,12 @@
                                 </div>
                             </div>
 
-                            @if (true)
-                            {
-                                <div class="card-header bg-white">
-                                    <div class="d-flex justify-content-evenly">
-                                        <div class="Stars" style="--rating: @Model.AverageRatings[job.Id]">
-                                        </div>
+                            <div class="card-header bg-white">
+                                <div class="d-flex justify-content-evenly">
+                                    <div class="Stars" style="--rating: @Model.AverageRatings[job.Id]">
                                     </div>
                                 </div>
-                            }
+                            </div>
                             <div class="card-text mt-2 mb-2">
                                 <span class="badge border border-warning text-dark">
                                     <h4 class="m-0">
@@ -87,11 +84,13 @@
 
 
 <div class="mt-5">
-        <i>
-            This site was created for demonstration purposes only.<br/>
-            For source code please check out <a class="link link-warning link-underline-opacity-25 link-underline-opacity-100-hover" href="https://github.com/Zocann">Github repository</a>.<br/>
-            <a asp-page="/Information">More information about this site</a>
-        </i>
+    <i>
+        This site was created for demonstration purposes only.<br/>
+        For source code please check out <a
+            class="link link-warning link-underline-opacity-25 link-underline-opacity-100-hover"
+            href="https://github.com/Zocann" target="_blank">Github repository</a>.<br/>
+        <a asp-page="/Information">More information about this site</a>
+    </i>
 </div>
 
 

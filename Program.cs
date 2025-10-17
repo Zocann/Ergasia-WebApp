@@ -3,6 +3,7 @@ using Ergasia_WebApp.ApiRepositories.Interfaces;
 using Ergasia_WebApp.Middleware;
 using Ergasia_WebApp.Services;
 using Ergasia_WebApp.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 

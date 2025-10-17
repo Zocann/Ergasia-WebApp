@@ -36,7 +36,7 @@ public class IndexModel(IJobApiRepository jobApiRepository, IRatingApiRepository
             }
 
             //Take only 6 best rated employers
-            AverageRatings = AverageRatings.OrderBy(ar => ar.Value).ThenBy(ar => ar.Key).Take(6).ToDictionary();
+            var ordered = AverageRatings.OrderBy(ar => ar.Value).Take(4).ToDictionary();
 
             Jobs = jobs.TakeWhile(j => AverageRatings.ContainsKey(j!.Id)).ToList();
         }

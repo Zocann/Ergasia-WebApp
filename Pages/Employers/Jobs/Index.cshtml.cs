@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Employers.Jobs;
 
-public class Index(IJobApiRepository jobApiRepository) : PageModel
+public class Index(IJobApiRepository jobApiRepository, IRatingApiRepository ratingApiRepository) : PageModel
 {
     private ClientData _clientData = new ClientData(new HttpContextAccessor());
 
@@ -21,7 +21,7 @@ public class Index(IJobApiRepository jobApiRepository) : PageModel
         if (!_clientData.GetId()) return RedirectToPage("/Error");
         if (!_clientData.GetAccessToken()) return Unauthorized();
 
-        var result = await jobApiRepository.GetFromEmployerAsync(_clientData.Id!, _clientData.AccessToken!);
+        var result = await jobApiRepository.GetFromEmployerAsync(_clientData.Id, _clientData.AccessToken);
         if (result == null)
         {
             if (Response.StatusCode == 401) return Unauthorized();
@@ -39,10 +39,10 @@ public class Index(IJobApiRepository jobApiRepository) : PageModel
         {
             if (job?.Id == null) continue;
             
-            var workerJobs = await jobApiRepository.GetWorkerJobsByJobIdAsync(job.Id, _clientData.AccessToken!);
+            var workerJobs = await jobApiRepository.GetWorkerJobsByJobIdAsync(job.Id, _clientData.AccessToken);
             if (workerJobs != null) WorkerJobsCount.Add(job.Id, workerJobs.Count());
             
-            var jobRequests = await jobApiRepository.GetJobRequestsByJobIdAsync(job.Id, _clientData.Id!, _clientData.AccessToken!);
+            var jobRequests = await jobApiRepository.GetJobRequestsByJobIdAsync(job.Id, _clientData.Id, _clientData.AccessToken);
             if (jobRequests != null) JobRequestCount.Add(job.Id, jobRequests.Count());
         }
 

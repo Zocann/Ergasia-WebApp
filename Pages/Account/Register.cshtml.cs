@@ -1,14 +1,16 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using Ergasia_WebApp.ApiRepositories.Interfaces;
 using Ergasia_WebApp.DTOs.User;
 using Ergasia_WebApp.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Account;
 
 [IgnoreAntiforgeryToken]
-public class Register(IUserApiRepository userApiRepository, ICookieService cookieService)
+public class Register(IUserApiRepository userApiRepository, ICookieService cookieService, IPasswordValidator<IdentityUser> passwordValidator)
     : PageModel
 {
     public string? Error;
@@ -39,8 +41,9 @@ public class Register(IUserApiRepository userApiRepository, ICookieService cooki
                     return RedirectToAction(nameof(OnGet), new {error = "This email address is already taken."});
             }
         }
-        
         else return RedirectToPage("/Error");
+        
+        if (!ValidatePassword(registerDto.Password)) return RedirectToAction(nameof(OnGet), new {error = "Invalid password. Please enter at least 8 characters with 1 lowercase and 1 uppercase letter, 1 digit and 1 special character."});
         
         var textInfo = CultureInfo.CurrentCulture.TextInfo;
         registerDto.FirstName = textInfo.ToTitleCase(registerDto.FirstName);
@@ -63,5 +66,13 @@ public class Register(IUserApiRepository userApiRepository, ICookieService cooki
         cookieService.AddCookie("userName", $"{user.FirstName} {user.LastName}", (DateTime)user.RefreshTokenExpiration);
 
         return RedirectToPage("/Account/Update/Picture");
+    }
+    
+    
+    private bool ValidatePassword(string password)
+    {
+        // At least 8 chars, 1 lowercase, 1 uppercase, 1 digit, 1 special char
+        var regex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");
+        return regex.IsMatch(password);
     }
 }

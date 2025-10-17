@@ -34,7 +34,7 @@ public class Index(IJobApiRepository jobApiRepository, IRatingApiRepository rati
             if (await jobApiRepository.GetAvailableWorkSpotsAsync(job.Id, _clientData.AccessToken) <= 0) continue;
             Jobs.Add(job);
             
-            var averageRating = await ratingApiRepository.GetJobAverageRating(job.Id);
+            var averageRating = await ratingApiRepository.GetEmployerAverageRating(job.EmployerId);
             if (averageRating != null) AverageRating.Add(job.Id, (decimal)averageRating);
         }
         Jobs = Jobs.OrderBy(j => j!.DateOfBegin).ToList();
