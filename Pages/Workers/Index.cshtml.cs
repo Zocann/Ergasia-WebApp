@@ -29,14 +29,8 @@ public class Index(IWorkerApiRepository workerApiRepository, IRatingApiRepositor
         foreach (var worker in Workers)
         {
             if (worker == null) continue;
-            var result = await ratingApiRepository.GetWorkerRatingsAsync(worker.Id, _clientData.AccessToken);
-            if ( result != null)
-            {
-                var workerRatings = result.ToList();
-                if (workerRatings.Count == 0) break;
-                workerRatings.RemoveAll(wr => wr == null);
-                AverageRating.Add(worker.Id, (decimal)workerRatings.Average(wr => wr!.NumericalRating));
-            }
+            var rating = await ratingApiRepository.GetWorkerAverageRating(worker.Id);
+            if (rating != null) AverageRating.Add(worker.Id, (decimal)rating);
         }
         
         return Page();

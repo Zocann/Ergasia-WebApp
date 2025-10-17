@@ -3,14 +3,13 @@ using System.Text.RegularExpressions;
 using Ergasia_WebApp.ApiRepositories.Interfaces;
 using Ergasia_WebApp.DTOs.User;
 using Ergasia_WebApp.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Account;
 
 [IgnoreAntiforgeryToken]
-public class Register(IUserApiRepository userApiRepository, ICookieService cookieService, IPasswordValidator<IdentityUser> passwordValidator)
+public class Register(IUserApiRepository userApiRepository, ICookieService cookieService)
     : PageModel
 {
     public string? Error;
