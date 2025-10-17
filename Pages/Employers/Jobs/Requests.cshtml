@@ -5,6 +5,24 @@
 @{
     ViewData["Title"] = "Job requests";
 }
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="toast-container p-3 top-0 start-50 translate-middle-x">
+        <div id="formToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+             aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @Model.Error
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    Model.Error = null;
+}
+
 @if (Model.Job.DateOfBegin.AddDays(Model.Job.Duration) < DateTime.UtcNow)
 {
     <h3 class="text-secondary mt-5">Unable to hire workers for finished job</h3>
@@ -66,3 +84,12 @@ else
     <br/>
     <a class="text-blue" asp-page="/Workers/Index">Contact workers</a>
 }
+
+
+<script>
+    window.onload = (event) => {
+        var formToast = document.getElementById('formToast')
+        var toastForm = new bootstrap.Toast(formToast);
+        toastForm.show()
+    }
+</script>

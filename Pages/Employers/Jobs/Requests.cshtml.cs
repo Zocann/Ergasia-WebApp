@@ -15,13 +15,14 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
 
     public required JobDto Job { get; set; }
     public IEnumerable<JobRequestDto?>? JobRequests { get; set; } = [];
+    public string? Error { get; set; }
     
-    public async Task<IActionResult> OnGetAsync()
+    public async Task<IActionResult> OnGetAsync(string? error)
     {
        if (!_clientData.GetAccessToken()) return Unauthorized();
        if (!_clientData.GetId()) return RedirectToPage("/Error");
        
-        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken!);
+        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
         if (job == null)
         {
             if (Response.StatusCode == 401) return Unauthorized();
@@ -29,9 +30,11 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
         }
         Job = job;
         
-        var jobRequests = await jobApiRepository.GetJobRequestsByJobIdAsync(JobId, _clientData.Id!, _clientData.AccessToken!);
+        var jobRequests = await jobApiRepository.GetJobRequestsByJobIdAsync(JobId, _clientData.Id, _clientData.AccessToken);
         
         JobRequests = jobRequests;
+        Error = error;
+        
         return Page();
     }
 
@@ -42,7 +45,16 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
 
         switch (method)
         {
-            case "post": 
+            case "post":
+                var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
+                if (job == null)
+                {
+                    if (Response.StatusCode == 401) return Unauthorized();
+                    return RedirectToPage("Error");
+                }
+                var workspots = await jobApiRepository.GetAvailableWorkSpotsAsync(JobId, _clientData.AccessToken);
+                if (workspots != null && workspots >= job.WorkSpots) return RedirectToAction(nameof(OnGetAsync), new { error = "Job is at full capacity. Update job information to hire more workers"});
+                
                 var workerJob = await jobApiRepository.PostWorkerJobAsync(JobId, _clientData.Id, workerId, _clientData.AccessToken!);
 
                 if (workerJob == null)
