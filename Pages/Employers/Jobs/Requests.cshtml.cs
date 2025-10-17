@@ -53,9 +53,9 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
                     return RedirectToPage("Error");
                 }
                 var workspots = await jobApiRepository.GetAvailableWorkSpotsAsync(JobId, _clientData.AccessToken);
-                if (workspots != null && workspots >= job.WorkSpots) return RedirectToAction(nameof(OnGetAsync), new { error = "Job is at full capacity. Update job information to hire more workers"});
+                if (workspots is <= 0) return RedirectToAction(nameof(OnGetAsync), new { error = "Job is at full capacity. Update job information to hire more workers"});
                 
-                var workerJob = await jobApiRepository.PostWorkerJobAsync(JobId, _clientData.Id, workerId, _clientData.AccessToken!);
+                var workerJob = await jobApiRepository.PostWorkerJobAsync(JobId, _clientData.Id, workerId, _clientData.AccessToken);
 
                 if (workerJob == null)
                 {
@@ -66,7 +66,7 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
                 return RedirectToAction(nameof(OnGetAsync));
             
             case "delete":
-                var deleted = await jobApiRepository.DeleteJobRequest(JobId, _clientData.Id!, workerId, _clientData.AccessToken!);
+                var deleted = await jobApiRepository.DeleteJobRequest(JobId, _clientData.Id!, workerId, _clientData.AccessToken);
                 if (!deleted)
                 {
                     if (Response.StatusCode == 401) return Unauthorized();
