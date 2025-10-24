@@ -37,9 +37,8 @@ else if (Model.JobRequests != null && Model.JobRequests.Any())
     </h3>
     
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0">
-        @foreach (var jobRequest in Model.JobRequests.TakeWhile(jobRequest => jobRequest != null))
+        @foreach (var jobRequest in Model.JobRequests)
         {
-            if (jobRequest == null) break;
             <div class="col">
                 <div class="card text-center text-md-start border-dark h-100">
                     <img class="card-img-top" src="@if (jobRequest.WorkerDto.PictureUrl != null) { @jobRequest.WorkerDto.PictureUrl } else { @("/images/NoProfilePicture.jpg") }" alt="Card image cap"

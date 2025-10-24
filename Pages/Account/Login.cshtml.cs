@@ -10,7 +10,6 @@ namespace Ergasia_WebApp.Pages.Account;
 public class Login(IUserApiRepository userApiRepository,ICookieService cookieService)
     : PageModel
 {
-    private ClientData _clientData = new(new HttpContextAccessor());
     public void OnGet()
     {
         
@@ -22,7 +21,6 @@ public class Login(IUserApiRepository userApiRepository,ICookieService cookieSer
         if (!ModelState.IsValid) return RedirectToPage("/Index", new { error = "Invalid email or password" });
         
         var user = await userApiRepository.LoginAsync(loginDto);
-        
         if (user == null) return RedirectToPage("/Index", new { error = "Invalid email or password" });
         
         //Saving cookies in browser

@@ -138,7 +138,7 @@
     </div>
 </div>
 
-@if (Model.WorkerRatings.Any())
+@if (Model.WorkerRatings != null)
 {
     <div class="mt-5 mb-3 ms-2">
         <span class="badge border border-warning text-dark">
@@ -150,7 +150,6 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0">
         @foreach (var rating in Model.WorkerRatings)
         {
-            if (rating == null) continue;
             <div class="col">
                 <div class="card border-dark-blue text-center h-100 w-auto">
                     <div class="card-header bg-white">

@@ -14,8 +14,8 @@ public class Index(IEmployerApiRepository employerApiRepository, IWorkerApiRepos
     
     public WorkerDto? Worker { get; set; }
     public EmployerDto? Employer { get; set; }
-    public List<WorkerRatingDto?> WorkerRatings { get; set; } = [];
-    public List<EmployerRatingDto?> EmployerRatings { get; set; } = [];
+    public List<WorkerRatingDto>? WorkerRatings { get; set; }
+    public List<EmployerRatingDto>? EmployerRatings { get; set; }
     
     public async Task<IActionResult> OnGet()
     {
@@ -34,12 +34,7 @@ public class Index(IEmployerApiRepository employerApiRepository, IWorkerApiRepos
                 }
                 Employer = employer;
                 
-                var employerRatings = await ratingApiRepository.GetEmployerRatingsAsync(employer.Id, _clientData.AccessToken);
-                if (employerRatings != null)
-                {
-                    EmployerRatings = employerRatings.ToList();
-                }
-                
+                EmployerRatings = await ratingApiRepository.GetEmployerRatingsAsync(employer.Id, _clientData.AccessToken);
                 break;
             
             case "Worker":
@@ -51,11 +46,7 @@ public class Index(IEmployerApiRepository employerApiRepository, IWorkerApiRepos
                 }
                 Worker = worker;
                 
-                var workerRatings = await ratingApiRepository.GetWorkerRatingsAsync(worker.Id, _clientData.AccessToken);
-                if (workerRatings != null)
-                {
-                    WorkerRatings = workerRatings.ToList();
-                }
+                WorkerRatings = await ratingApiRepository.GetWorkerRatingsAsync(worker.Id, _clientData.AccessToken);
                 break;
         }
         

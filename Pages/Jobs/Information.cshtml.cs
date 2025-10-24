@@ -13,7 +13,7 @@ public class Information(IJobApiRepository jobApiRepository, IRatingApiRepositor
     [BindProperty(SupportsGet = true)]
     public required string JobId { get; set; }
     public required JobDto JobDto { get; set; }
-    public required List<WorkerJobDto?> WorkerJobs { get; set; }
+    public required List<WorkerJobDto>? WorkerJobs { get; set; }
     public decimal? AverageRating { get; set; }
     
     public async Task<IActionResult> OnGetAsync()
@@ -21,7 +21,7 @@ public class Information(IJobApiRepository jobApiRepository, IRatingApiRepositor
         if (!_clientData.GetAccessToken()) return Unauthorized();
         
         var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken!);
-        if (job == null || job.Id == null)
+        if (job?.Id == null)
         {
             if (Response.StatusCode == 401) return Unauthorized();
             return RedirectToPage("/Error");
@@ -31,9 +31,8 @@ public class Information(IJobApiRepository jobApiRepository, IRatingApiRepositor
         var workerJobs = await jobApiRepository.GetWorkerJobsByJobIdAsync(job.Id, _clientData.AccessToken!);
         if (workerJobs != null)
         {
-            var wj = workerJobs.ToList();
-            wj.RemoveAll(j => j is { NumericalRating: null });
-            WorkerJobs = wj;
+            workerJobs.RemoveAll(j => j.NumericalRating == null);
+            WorkerJobs = workerJobs;
         }
         
         AverageRating = await ratingApiRepository.GetJobAverageRating(job.Id);

@@ -8,13 +8,13 @@ namespace Ergasia_WebApp.Pages.Employers.Jobs;
 
 public class Requests(IJobApiRepository jobApiRepository) : PageModel
 {
-    private ClientData _clientData = new ClientData(new HttpContextAccessor());
+    private ClientData _clientData = new (new HttpContextAccessor());
     
     [BindProperty(SupportsGet = true)]
     public required string JobId { get; set; }
 
     public required JobDto Job { get; set; }
-    public IEnumerable<JobRequestDto?>? JobRequests { get; set; } = [];
+    public List<JobRequestDto>? JobRequests { get; set; } = [];
     public string? Error { get; set; }
     
     public async Task<IActionResult> OnGetAsync(string? error)
@@ -30,11 +30,9 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
         }
         Job = job;
         
-        var jobRequests = await jobApiRepository.GetJobRequestsByJobIdAsync(JobId, _clientData.Id, _clientData.AccessToken);
+        JobRequests = await jobApiRepository.GetJobRequestsByJobIdAsync(JobId, _clientData.Id, _clientData.AccessToken);
         
-        JobRequests = jobRequests;
         Error = error;
-        
         return Page();
     }
 
@@ -53,7 +51,7 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
                     return RedirectToPage("Error");
                 }
                 var workspots = await jobApiRepository.GetAvailableWorkSpotsAsync(JobId, _clientData.AccessToken);
-                if (workspots is <= 0) return RedirectToAction(nameof(OnGetAsync), new { error = "Job is at full capacity. Update job information to hire more workers"});
+                if (workspots <= 0) return RedirectToAction(nameof(OnGetAsync), new { error = "Job is at full capacity. Update job information to hire more workers"});
                 
                 var workerJob = await jobApiRepository.PostWorkerJobAsync(JobId, _clientData.Id, workerId, _clientData.AccessToken);
 
@@ -66,7 +64,7 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
                 return RedirectToAction(nameof(OnGetAsync));
             
             case "delete":
-                var deleted = await jobApiRepository.DeleteJobRequest(JobId, _clientData.Id!, workerId, _clientData.AccessToken);
+                var deleted = await jobApiRepository.DeleteJobRequest(JobId, _clientData.Id, workerId, _clientData.AccessToken);
                 if (!deleted)
                 {
                     if (Response.StatusCode == 401) return Unauthorized();

@@ -32,11 +32,9 @@ public class AddReview(IEmployerApiRepository employerApiRepository, IRatingApiR
         }
 
         Employer = employer;
-
-        var rating = await ratingApiRepository.GetEmployerRatingAsync(EmployerId, _clientData.Id, _clientData.AccessToken);
-
-        Rating = rating;
+        Rating = await ratingApiRepository.GetEmployerRatingAsync(EmployerId, _clientData.Id, _clientData.AccessToken);
         Error = error;
+        
         return Page();
     }
 
@@ -47,7 +45,6 @@ public class AddReview(IEmployerApiRepository employerApiRepository, IRatingApiR
         {
             return RedirectToAction(nameof(OnGetAsync), new {error = "Please provide a valid rating"});
         }
-        
         if (!_clientData.GetAccessToken()) return Unauthorized();
         if (!_clientData.GetId()) return RedirectToPage("/Error");
 

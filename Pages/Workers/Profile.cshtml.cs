@@ -15,7 +15,7 @@ public class Profile(IWorkerApiRepository workerApiRepository, IRatingApiReposit
     [BindProperty(SupportsGet = true)]
     public required string WorkerId { get; set; }
     public required WorkerDto Worker { get; set; }
-    public required List<WorkerRatingDto?> WorkerRatings { get; set; }
+    public required List<WorkerRatingDto>? WorkerRatings { get; set; }
     public decimal? AverageRating { get; set; }
     
     public async Task<IActionResult> OnGetAsync()
@@ -28,15 +28,9 @@ public class Profile(IWorkerApiRepository workerApiRepository, IRatingApiReposit
             if (Response.StatusCode == 401) return Unauthorized();
             return RedirectToPage("/Error");
         }
-        Worker = worker;
         
-        var ratings = await ratingApiRepository.GetWorkerRatingsAsync(WorkerId, _clientData.AccessToken);
-
-        if (ratings != null)
-        {
-            WorkerRatings = ratings.ToList();
-        }
-
+        Worker = worker;
+        WorkerRatings = await ratingApiRepository.GetWorkerRatingsAsync(WorkerId, _clientData.AccessToken);
         AverageRating = await ratingApiRepository.GetWorkerAverageRating(WorkerId);
         
         return Page();

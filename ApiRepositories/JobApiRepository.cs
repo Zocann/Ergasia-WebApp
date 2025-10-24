@@ -22,7 +22,7 @@ public class JobApiRepository(IHttpContextAccessor contextAccessor, IHttpClientF
         return JsonSerializerService.Deserialize<JobDto>(responseString);
     }
 
-    public async Task<IEnumerable<JobDto?>?> GetFromEmployerAsync(string employerId, string accessToken)
+    public async Task<List<JobDto>?> GetFromEmployerAsync(string employerId, string accessToken)
     {
         RegisterAuthorizationHeader(accessToken);
         
@@ -30,16 +30,16 @@ public class JobApiRepository(IHttpContextAccessor contextAccessor, IHttpClientF
         if (!ManageResponse(response)) return null;
 
         var responseString = await response.Content.ReadAsStringAsync();
-        return JsonSerializerService.Deserialize<List<JobDto?>>(responseString);
+        return JsonSerializerService.Deserialize<List<JobDto>?>(responseString);
     }
 
-    public async Task<IEnumerable<JobDto?>?> GetAllUpcomingAsync()
+    public async Task<List<JobDto>?> GetAllUpcomingAsync()
     {
         var response = await _client.GetAsync("Jobs");
         if (!ManageResponse(response)) return null;
 
         var responseString = await response.Content.ReadAsStringAsync();
-        return JsonSerializerService.Deserialize<List<JobDto?>>(responseString);
+        return JsonSerializerService.Deserialize<List<JobDto>>(responseString);
     }
 
     public async Task<JobDto?> AddAsync(JobDto jobDto, string accessToken)
@@ -81,7 +81,7 @@ public class JobApiRepository(IHttpContextAccessor contextAccessor, IHttpClientF
         return JsonSerializerService.Deserialize<WorkerJobDto>(responseString);
     }
 
-    public async Task<IEnumerable<WorkerJobDto?>?> GetWorkerJobsByJobIdAsync(string jobId, string accessToken)
+    public async Task<List<WorkerJobDto>?> GetWorkerJobsByJobIdAsync(string jobId, string accessToken)
     {
         RegisterAuthorizationHeader(accessToken);
         
@@ -89,10 +89,10 @@ public class JobApiRepository(IHttpContextAccessor contextAccessor, IHttpClientF
         if (!ManageResponse(response)) return null;
         
         var responseString = await response.Content.ReadAsStringAsync();
-        return JsonSerializerService.Deserialize<IEnumerable<WorkerJobDto?>>(responseString);
+        return JsonSerializerService.Deserialize<List<WorkerJobDto>>(responseString);
     }
 
-    public async Task<IEnumerable<WorkerJobDto?>?> GetWorkerJobsByWorkerIdAsync(string workerId, string accessToken)
+    public async Task<List<WorkerJobDto>?> GetWorkerJobsByWorkerIdAsync(string workerId, string accessToken)
     {
         RegisterAuthorizationHeader(accessToken);
         
@@ -100,7 +100,7 @@ public class JobApiRepository(IHttpContextAccessor contextAccessor, IHttpClientF
         if (!ManageResponse(response)) return null;
         
         var responseString = await response.Content.ReadAsStringAsync();
-        return JsonSerializerService.Deserialize<IEnumerable<WorkerJobDto?>>(responseString);
+        return JsonSerializerService.Deserialize<List<WorkerJobDto>>(responseString);
     }
 
     public async Task<WorkerJobDto?> PostWorkerJobAsync(string jobId, string employerId, string workerId, string accessToken)
@@ -140,7 +140,7 @@ public class JobApiRepository(IHttpContextAccessor contextAccessor, IHttpClientF
         return JsonSerializerService.Deserialize<JobRequestDto>(responseString);
     }
 
-    public async Task<IEnumerable<JobRequestDto?>?> GetJobRequestsByJobIdAsync(string jobId, string employerId, string accessToken)
+    public async Task<List<JobRequestDto>?> GetJobRequestsByJobIdAsync(string jobId, string employerId, string accessToken)
     {
         RegisterAuthorizationHeader(accessToken);
         
@@ -148,10 +148,10 @@ public class JobApiRepository(IHttpContextAccessor contextAccessor, IHttpClientF
         if (!ManageResponse(response)) return null;
         
         var responseString = await response.Content.ReadAsStringAsync();
-        return JsonSerializerService.Deserialize<IEnumerable<JobRequestDto?>>(responseString);
+        return JsonSerializerService.Deserialize<List<JobRequestDto>>(responseString);
     }
 
-    public async Task<IEnumerable<JobRequestDto?>?> GetJobRequestsByWorkerIdAsync(string workerId, string accessToken)
+    public async Task<List<JobRequestDto>?> GetJobRequestsByWorkerIdAsync(string workerId, string accessToken)
     {
         RegisterAuthorizationHeader(accessToken);
         
@@ -159,7 +159,7 @@ public class JobApiRepository(IHttpContextAccessor contextAccessor, IHttpClientF
         if (!ManageResponse(response)) return null;
         
         var responseString = await response.Content.ReadAsStringAsync();
-        return JsonSerializerService.Deserialize<IEnumerable<JobRequestDto?>>(responseString);
+        return JsonSerializerService.Deserialize<List<JobRequestDto>>(responseString);
     }
 
     public async Task<JobRequestDto?> PostJobRequestAsync(string jobId, string workerId, string? message, string accessToken)

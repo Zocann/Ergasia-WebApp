@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Employers.Jobs;
 
-public class Index(IJobApiRepository jobApiRepository, IRatingApiRepository ratingApiRepository) : PageModel
+public class Index(IJobApiRepository jobApiRepository) : PageModel
 {
-    private ClientData _clientData = new ClientData(new HttpContextAccessor());
+    private ClientData _clientData = new(new HttpContextAccessor());
 
-    public required IEnumerable<JobDto?> Jobs { get; set; } = [];
-    public required IEnumerable<JobDto?> FinishedJobs { get; set; } = [];
+    public required List<JobDto> Jobs { get; set; } = [];
+    public required List<JobDto> FinishedJobs { get; set; } = [];
     
     public Dictionary<string, int> JobRequestCount { get; set; } = new();
     public Dictionary<string, int> WorkerJobsCount { get; set; } = new();
@@ -21,29 +21,25 @@ public class Index(IJobApiRepository jobApiRepository, IRatingApiRepository rati
         if (!_clientData.GetId()) return RedirectToPage("/Error");
         if (!_clientData.GetAccessToken()) return Unauthorized();
 
-        var result = await jobApiRepository.GetFromEmployerAsync(_clientData.Id, _clientData.AccessToken);
-        if (result == null)
+        var jobs = await jobApiRepository.GetFromEmployerAsync(_clientData.Id, _clientData.AccessToken);
+        if (jobs == null)
         {
             if (Response.StatusCode == 401) return Unauthorized();
             return RedirectToPage("/Error");
         }
-
-        var jobs = result.ToList();
         
-        if (jobs.Count == 0 || jobs.Any(j => j == null)) return Page();
-        
-        FinishedJobs = jobs.Where(j => j!.DateOfBegin.AddDays(j.Duration) < DateTime.UtcNow).OrderByDescending(j => j!.DateOfBegin);
-        Jobs = jobs.Where(j => j!.DateOfBegin.AddDays(j.Duration) > DateTime.UtcNow).OrderBy(j => j!.DateOfBegin);
+        FinishedJobs = jobs.Where(j => j.DateOfBegin.AddDays(j.Duration) < DateTime.UtcNow).OrderByDescending(j => j.DateOfBegin).ToList();
+        Jobs = jobs.Where(j => j.DateOfBegin.AddDays(j.Duration) > DateTime.UtcNow).OrderBy(j => j.DateOfBegin).ToList();
             
         foreach (var job in Jobs)
         {
-            if (job?.Id == null) continue;
+            if (job.Id == null) continue;
             
             var workerJobs = await jobApiRepository.GetWorkerJobsByJobIdAsync(job.Id, _clientData.AccessToken);
-            if (workerJobs != null) WorkerJobsCount.Add(job.Id, workerJobs.Count());
+            if (workerJobs != null) WorkerJobsCount.Add(job.Id, workerJobs.Count);
             
             var jobRequests = await jobApiRepository.GetJobRequestsByJobIdAsync(job.Id, _clientData.Id, _clientData.AccessToken);
-            if (jobRequests != null) JobRequestCount.Add(job.Id, jobRequests.Count());
+            if (jobRequests != null) JobRequestCount.Add(job.Id, jobRequests.Count);
         }
 
         return Page();

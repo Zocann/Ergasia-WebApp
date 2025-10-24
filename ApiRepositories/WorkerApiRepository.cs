@@ -23,7 +23,7 @@ public class WorkerApiRepository(IHttpContextAccessor contextAccessor, IHttpClie
         return JsonSerializerService.Deserialize<WorkerDto>(responseString);
     }
 
-    public async Task<IEnumerable<WorkerDto?>?> GetAllAsync(string accessToken)
+    public async Task<List<WorkerDto>?> GetAllAsync(string accessToken)
     {
         RegisterAuthorizationHeader(accessToken);
         
@@ -31,7 +31,7 @@ public class WorkerApiRepository(IHttpContextAccessor contextAccessor, IHttpClie
         if (!ManageResponse(response)) return null;
 
         var responseString = await response.Content.ReadAsStringAsync();
-        return JsonSerializerService.Deserialize<IEnumerable<WorkerDto?>>(responseString);
+        return JsonSerializerService.Deserialize<List<WorkerDto>>(responseString);
     }
 
     public async Task<WorkerDto?> PatchAsync(WorkerDto workerDto, string accessToken)

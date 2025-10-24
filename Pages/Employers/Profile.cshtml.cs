@@ -15,7 +15,7 @@ public class Profile(IEmployerApiRepository employerApiRepository, IRatingApiRep
     [BindProperty(SupportsGet = true)]
     public required string EmployerId { get; set; }
     public required EmployerDto Employer { get; set; }
-    public required List<EmployerRatingDto?> EmployerRatings { get; set; } = [];
+    public required List<EmployerRatingDto>? EmployerRatings { get; set; }
     public decimal? AverageRating { get; set; }
     
     public async Task<IActionResult> OnGetAsync()
@@ -28,15 +28,9 @@ public class Profile(IEmployerApiRepository employerApiRepository, IRatingApiRep
             if (Response.StatusCode == 401) return Unauthorized();
             return RedirectToPage("/Error");
         }
-        Employer = employer;
-
-        var ratings = await ratingApiRepository.GetEmployerRatingsAsync(EmployerId, _clientData.AccessToken);
-
-        if (ratings != null)
-        {
-            EmployerRatings = ratings.ToList();
-        }
         
+        Employer = employer;
+        EmployerRatings = await ratingApiRepository.GetEmployerRatingsAsync(EmployerId, _clientData.AccessToken);
         AverageRating = await ratingApiRepository.GetEmployerAverageRating(EmployerId);
         
         return Page();

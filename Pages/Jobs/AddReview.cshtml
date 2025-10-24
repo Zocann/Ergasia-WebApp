@@ -7,22 +7,8 @@
     var job = Model.Job;
     var rating = -1;
     if (Model.Rating?.NumericalRating != null) rating = (int)Model.Rating.NumericalRating;
-}
 
-@if (!string.IsNullOrEmpty(Model.Error))
-{
-    <div class="toast-container p-3 top-0 start-50 translate-middle-x">
-        <div id="formToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
-             aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    @Model.Error
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                        aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
+    @await Html.PartialAsync("_Partial/_PartialToast", Model.Error);
     Model.Error = null;
 }
 
@@ -106,11 +92,3 @@
 
     </div>
 </div>
-
-<script>
-    window.onload = (event) => {
-        var formToast = document.getElementById('formToast')
-        var toastForm = new bootstrap.Toast(formToast);
-        toastForm.show()
-    }
-</script>

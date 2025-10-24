@@ -22,7 +22,7 @@ public class AddReview(IJobApiRepository jobApiRepository, IRatingApiRepository 
         if (!_clientData.GetAccessToken()) return Unauthorized();
         if (!_clientData.GetId()) return RedirectToPage("/Error");
 
-        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken!);
+        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
         if (job == null)
         {
             if (Response.StatusCode == 401) return Unauthorized();
@@ -30,10 +30,9 @@ public class AddReview(IJobApiRepository jobApiRepository, IRatingApiRepository 
         }
 
         Job = job;
-        var rating = await jobApiRepository.GetWorkerJobAsync(JobId, _clientData.Id!, _clientData.AccessToken!);
-
-        Rating = rating;
+        Rating = await jobApiRepository.GetWorkerJobAsync(JobId, _clientData.Id, _clientData.AccessToken);
         Error = error;
+        
         return Page();
     }
 
@@ -44,13 +43,12 @@ public class AddReview(IJobApiRepository jobApiRepository, IRatingApiRepository 
         {
             return RedirectToAction(nameof(OnGetAsync), new {error = "Please provide a valid rating"});
         }
-        
         if (!_clientData.GetAccessToken()) return Unauthorized();
         if (!_clientData.GetId()) return RedirectToPage("/Error");
 
         if (delete == "true")
         {
-            if (!await ratingApiRepository.DeleteJobRatingAsync(employerId, JobId, _clientData.Id!, _clientData.AccessToken!))
+            if (!await ratingApiRepository.DeleteJobRatingAsync(employerId, JobId, _clientData.Id, _clientData.AccessToken))
             {
                 if (Response.StatusCode == 401) return Unauthorized();
                 return RedirectToPage("/Error");
@@ -59,7 +57,7 @@ public class AddReview(IJobApiRepository jobApiRepository, IRatingApiRepository 
             return RedirectToAction(nameof(OnGetAsync));
         }
 
-        var workerJob = await ratingApiRepository.PatchJobRatingAsync(employerId, JobId, _clientData.Id!, rating, verRating, _clientData.AccessToken!);
+        var workerJob = await ratingApiRepository.PatchJobRatingAsync(employerId, JobId, _clientData.Id, rating, verRating, _clientData.AccessToken);
 
         if (workerJob == null)
         {

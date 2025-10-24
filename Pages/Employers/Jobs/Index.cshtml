@@ -4,8 +4,8 @@
 
 @{
     ViewData["Title"] = "My jobs";
-    var jobs = Model.Jobs.ToList();
-    var finishedJobs = Model.FinishedJobs.ToList();
+    var jobs = Model.Jobs;
+    var finishedJobs = Model.FinishedJobs;
 }
 
 @if (jobs.Any())
@@ -13,8 +13,8 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0">
         @foreach (var job in jobs)
         {
-            if (job?.Id == null) continue;
-
+            if (job.Id == null) continue;
+            
             var dateOfBegin = job.DateOfBegin;
             var currentDate = DateTime.UtcNow;
 
@@ -114,7 +114,6 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0">
         @foreach (var finishedJob in finishedJobs)
         {
-            if (finishedJob == null) continue;
             <div class="col">
                 <div class="card border-dark text-center h-100">
                     <div class="card-header bg-white">

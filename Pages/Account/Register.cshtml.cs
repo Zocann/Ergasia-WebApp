@@ -21,13 +21,13 @@ public class Register(IUserApiRepository userApiRepository, ICookieService cooki
     public async Task<IActionResult> OnPostAsync(RegisterDto registerDto, string date, string role)
     {
         if (!DateTime.TryParse(date, out var dateOfBirth)) return RedirectToAction(nameof(OnGet), new {error = "Invalid date of birth."});
-        registerDto.DateOfBirth = dateOfBirth;
-        
         if (!ModelState.IsValid)
         {
             return RedirectToAction(nameof(OnGet), new {error = "Please follow form instructions."});
         }
 
+        registerDto.DateOfBirth = dateOfBirth;
+        
         //Validate if email is not already taken
         if (registerDto.Email != null)
         {

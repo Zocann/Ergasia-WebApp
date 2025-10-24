@@ -8,7 +8,7 @@ namespace Ergasia_WebApp.Pages.Jobs;
 
 public class Application(IJobApiRepository jobApiRepository) : PageModel
 {
-    private ClientData _clientData = new ClientData(new HttpContextAccessor());
+    private ClientData _clientData = new (new HttpContextAccessor());
     
     [BindProperty(SupportsGet = true)] 
     public required string JobId { get; set; }
@@ -21,17 +21,16 @@ public class Application(IJobApiRepository jobApiRepository) : PageModel
         if (!_clientData.GetAccessToken()) return Unauthorized();
         if (!_clientData.GetId()) return RedirectToPage("/Error");
 
-        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken!);
-        if (job == null || job.Id == null)
+        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
+        if (job?.Id == null)
         {
             if (Response.StatusCode == 401) return Unauthorized();
             return RedirectToPage("/Error");
         }
 
         JobDto = job;
-        
-        WorkerJob = await jobApiRepository.GetWorkerJobAsync(JobId, _clientData.Id!, _clientData.AccessToken!);
-        JobRequest = await jobApiRepository.GetJobRequestAsync(JobId, _clientData.Id!, _clientData.AccessToken!);
+        WorkerJob = await jobApiRepository.GetWorkerJobAsync(JobId, _clientData.Id, _clientData.AccessToken);
+        JobRequest = await jobApiRepository.GetJobRequestAsync(JobId, _clientData.Id, _clientData.AccessToken);
 
         return Page();
     }
@@ -41,7 +40,7 @@ public class Application(IJobApiRepository jobApiRepository) : PageModel
         if (!_clientData.GetAccessToken()) return Unauthorized();
         if (!_clientData.GetId()) return RedirectToPage("/Error");
         
-        var jobRequest = await jobApiRepository.PostJobRequestAsync(JobId, _clientData.Id!, message, _clientData.AccessToken!);
+        var jobRequest = await jobApiRepository.PostJobRequestAsync(JobId, _clientData.Id, message, _clientData.AccessToken);
 
         if (jobRequest == null)
         {

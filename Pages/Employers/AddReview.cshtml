@@ -7,6 +7,9 @@
     var employer = Model.Employer;
     var rating = -1;
     if (Model.Rating != null) rating = Model.Rating.NumericalRating;
+
+    @await Html.PartialAsync("_Partial/_PartialToast", Model.Error)
+    Model.Error = null;
 }
 
 <div>
@@ -89,39 +92,4 @@
 
     </div>
 </div>
-
-<style>
-    .star-rating {
-        direction: rtl;
-        display: inline-block;
-        cursor: pointer;
-    }
-
-    .star-rating input {
-        display: none;
-    }
-
-    .star-rating label {
-        color: #ddd;
-        font-size: 24px;
-        padding: 0 2px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .star-rating label:hover,
-    .star-rating label:hover ~ label,
-    .star-rating input:checked ~ label {
-        color: #ffc107;
-    }
-</style>
-
-<script>
-
-        window.onload = (event) => {
-        var formToast = document.getElementById('formToast')
-        var toastForm = new bootstrap.Toast(formToast);
-        toastForm.show()
-    }
-</script>
 

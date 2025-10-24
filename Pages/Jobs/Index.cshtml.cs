@@ -10,7 +10,7 @@ public class Index(IJobApiRepository jobApiRepository, IRatingApiRepository rati
 {
     private ClientData _clientData = new(new HttpContextAccessor());
 
-    public required List<JobDto?> Jobs { get; set; } = [];
+    public required List<JobDto> Jobs { get; set; } = [];
     
     public Dictionary<string, decimal> AverageRating { get; set; } = new();
 
@@ -18,26 +18,24 @@ public class Index(IJobApiRepository jobApiRepository, IRatingApiRepository rati
     {
         if (!_clientData.GetAccessToken()) return Unauthorized();
 
-        var result = await jobApiRepository.GetAllUpcomingAsync();
+        var jobs = await jobApiRepository.GetAllUpcomingAsync();
 
-        if (result == null)
+        if (jobs == null)
         {
             if (Response.StatusCode == 401) return Unauthorized();
             return RedirectToPage("/Error");
         }
-        var jobs = result.ToList();
-        jobs.RemoveAll(j => j == null);
         
         foreach (var job in jobs)
         {
-            if (job?.Id == null || job?.EmployerId == null) continue;
+            if (job.Id == null || job.EmployerId == null) continue;
             if (await jobApiRepository.GetAvailableWorkSpotsAsync(job.Id, _clientData.AccessToken) <= 0) continue;
             Jobs.Add(job);
             
             var averageRating = await ratingApiRepository.GetEmployerAverageRating(job.EmployerId);
             if (averageRating != null) AverageRating.Add(job.Id, (decimal)averageRating);
         }
-        Jobs = Jobs.OrderBy(j => j!.DateOfBegin).ToList();
+        Jobs = Jobs.OrderBy(j => j.DateOfBegin).ToList();
         
         return Page();
     }

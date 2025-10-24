@@ -23,7 +23,7 @@ public class AddReview(IWorkerApiRepository workerApiRepository, IRatingApiRepos
         if (!_clientData.GetAccessToken()) return Unauthorized();
         if (!_clientData.GetId()) return RedirectToPage("/Error");
 
-        var worker = await workerApiRepository.GetAsync(WorkerId, _clientData.AccessToken!);
+        var worker = await workerApiRepository.GetAsync(WorkerId, _clientData.AccessToken);
         if (worker == null)
         {
             if (Response.StatusCode == 401) return Unauthorized();
@@ -31,11 +31,9 @@ public class AddReview(IWorkerApiRepository workerApiRepository, IRatingApiRepos
         }
 
         Worker = worker;
-
-        var rating = await ratingApiRepository.GetWorkerRatingAsync(WorkerId, _clientData.Id!, _clientData.AccessToken!);
-
-        Rating = rating;
+        Rating = await ratingApiRepository.GetWorkerRatingAsync(WorkerId, _clientData.Id, _clientData.AccessToken);
         Error = error;
+        
         return Page();
     }
 
@@ -46,13 +44,12 @@ public class AddReview(IWorkerApiRepository workerApiRepository, IRatingApiRepos
         {
             return RedirectToAction(nameof(OnGetAsync), new {error = "Please provide a valid rating"});
         }
-        
         if (!_clientData.GetAccessToken()) return Unauthorized();
         if (!_clientData.GetId()) return RedirectToPage("/Error");
         
         if (delete == "true")
         {
-            if (!await ratingApiRepository.DeleteWorkerRatingAsync(WorkerId, _clientData.Id!, _clientData.AccessToken!))
+            if (!await ratingApiRepository.DeleteWorkerRatingAsync(WorkerId, _clientData.Id, _clientData.AccessToken))
             {
                 if (Response.StatusCode == 401) return Unauthorized();
                 return RedirectToPage("/Error");
@@ -65,7 +62,7 @@ public class AddReview(IWorkerApiRepository workerApiRepository, IRatingApiRepos
         switch (action)
         {
             case "post":
-                workerRating = await ratingApiRepository.PostWorkerRatingAsync(workerId, _clientData.Id!, rating, verRating, _clientData.AccessToken!);
+                workerRating = await ratingApiRepository.PostWorkerRatingAsync(workerId, _clientData.Id, rating, verRating, _clientData.AccessToken);
 
                 if (workerRating == null)
                 {
@@ -75,7 +72,7 @@ public class AddReview(IWorkerApiRepository workerApiRepository, IRatingApiRepos
                 break;
 
             case "update":
-                workerRating = await ratingApiRepository.PatchWorkerRatingAsync(workerId, _clientData.Id!, rating, verRating, _clientData.AccessToken!);
+                workerRating = await ratingApiRepository.PatchWorkerRatingAsync(workerId, _clientData.Id, rating, verRating, _clientData.AccessToken);
 
                 if (workerRating == null)
                 {

@@ -23,7 +23,7 @@ public class RatingApiRepository(IHttpContextAccessor contextAccessor, IHttpClie
         return JsonSerializerService.Deserialize<EmployerRatingDto?>(responseString);
     }
 
-    public async Task<IEnumerable<EmployerRatingDto?>?> GetEmployerRatingsAsync(string employerId, string accessToken)
+    public async Task<List<EmployerRatingDto>?> GetEmployerRatingsAsync(string employerId, string accessToken)
     {
         RegisterAuthorizationHeader(accessToken);
         var response = await _client.GetAsync($"Employers/{employerId}/Ratings");
@@ -31,7 +31,7 @@ public class RatingApiRepository(IHttpContextAccessor contextAccessor, IHttpClie
         if (!ManageResponse(response)) return null;
 
         var responseString = await response.Content.ReadAsStringAsync();
-        return JsonSerializerService.Deserialize<IEnumerable<EmployerRatingDto?>?>(responseString);
+        return JsonSerializerService.Deserialize<List<EmployerRatingDto>>(responseString);
     }
 
     public async Task<decimal?> GetEmployerAverageRating(string employerId)
@@ -83,7 +83,7 @@ public class RatingApiRepository(IHttpContextAccessor contextAccessor, IHttpClie
         RegisterAuthorizationHeader(accessToken);
         var response = await _client.DeleteAsync($"Employers/{employerId}/Ratings/{workerId}");
         
-        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) Context.Response.StatusCode = 401;
+        if (response.StatusCode == HttpStatusCode.Unauthorized) Context.Response.StatusCode = 401;
         
         return response.IsSuccessStatusCode;
     }
@@ -99,7 +99,7 @@ public class RatingApiRepository(IHttpContextAccessor contextAccessor, IHttpClie
         return JsonSerializerService.Deserialize<WorkerRatingDto?>(responseString);
     }
 
-    public async Task<IEnumerable<WorkerRatingDto?>?> GetWorkerRatingsAsync(string workerId, string accessToken)
+    public async Task<List<WorkerRatingDto>?> GetWorkerRatingsAsync(string workerId, string accessToken)
     {
         RegisterAuthorizationHeader(accessToken);
         var response = await _client.GetAsync($"Workers/{workerId}/Ratings");
@@ -107,7 +107,7 @@ public class RatingApiRepository(IHttpContextAccessor contextAccessor, IHttpClie
         if (!ManageResponse(response)) return null;
 
         var responseString = await response.Content.ReadAsStringAsync();
-        return JsonSerializerService.Deserialize<IEnumerable<WorkerRatingDto?>?>(responseString);
+        return JsonSerializerService.Deserialize<List<WorkerRatingDto>?>(responseString);
     }
 
     public async Task<decimal?> GetWorkerAverageRating(string workerId)
@@ -158,7 +158,7 @@ public class RatingApiRepository(IHttpContextAccessor contextAccessor, IHttpClie
         RegisterAuthorizationHeader(accessToken);
         var response = await _client.DeleteAsync($"Workers/{workerId}/Ratings/{employerId}");
         
-        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) Context.Response.StatusCode = 401;
+        if (response.StatusCode == HttpStatusCode.Unauthorized) Context.Response.StatusCode = 401;
         
         return response.IsSuccessStatusCode;
     }
@@ -196,7 +196,7 @@ public class RatingApiRepository(IHttpContextAccessor contextAccessor, IHttpClie
         RegisterAuthorizationHeader(accessToken);
         
         var response = await _client.DeleteAsync($"Employers/{employerId}/Jobs/{jobId}/Ratings/{workerId}");
-        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) Context.Response.StatusCode = 401;
+        if (response.StatusCode == HttpStatusCode.Unauthorized) Context.Response.StatusCode = 401;
 
         return response.IsSuccessStatusCode;
     }
