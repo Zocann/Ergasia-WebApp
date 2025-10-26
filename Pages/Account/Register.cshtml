@@ -5,22 +5,7 @@
 
 @{
     ViewData["Title"] = "Register";
-}
-
-@if (!string.IsNullOrEmpty(Model.Error))
-{
-    <div class="toast-container p-3 top-0 start-50 translate-middle-x">
-        <div id="formToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
-             aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    @Model.Error
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                        aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
+    @await Html.PartialAsync("_Partial/_PartialToast", Model.Error)
     Model.Error = null;
 }
 
@@ -97,6 +82,9 @@
                    required
                    aria-label="Password"/>
             <label for="password">Password</label>
+            <div id="reg-count">
+                Please provide 8 more characters.
+            </div>
             <p class="text-warning"><i>Please enter at least 8 characters with 1 lowercase and 1 uppercase letter, 1 digit and 1 special character.</i></p>
         </div>
 
@@ -105,10 +93,4 @@
     <div class="d-none d-md-block" style="flex: 1;"></div>
 </div>
 
-<script>
-    window.onload = (event) => {
-        var formToast = document.getElementById('formToast')
-        var toastForm = new bootstrap.Toast(formToast);
-        toastForm.show()
-    }
-</script>
+<script src="~/js/reg-validation.js"></script>

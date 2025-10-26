@@ -11,6 +11,7 @@
     "is-extglob": "^2.1.1",
     "is-glob": "^4.0.3",
     "is-number": "^7.0.0",
+    "jquery": "^3.7.1",
     "micromatch": "^4.0.8",
     "node-addon-api": "^7.1.1",
     "picomatch": "^2.3.1",
