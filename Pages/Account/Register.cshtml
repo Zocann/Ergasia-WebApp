@@ -78,14 +78,26 @@
         </div>
 
         <div class="form-floating mb-3 col-md-7">
-            <input type="password" class="form-control mb-3" name="Password" id="password"
+            <input type="password" class="form-control mb-3 is-invalid" name="Password" id="password"
                    required
                    aria-label="Password"/>
             <label for="password">Password</label>
-            <div id="reg-count">
-                Please provide 8 more characters.
+
+            <div class="d-block w-100" id="reg-count">
+                Please enter 8 more characters
             </div>
-            <p class="text-warning"><i>Please enter at least 8 characters with 1 lowercase and 1 uppercase letter, 1 digit and 1 special character.</i></p>
+            <div class="d-block w-100 is-invalid" id="reg-low">
+                Lowercase.
+            </div>
+            <div class="d-block w-100 is-invalid" id="reg-up">
+                Uppercase.
+            </div>
+            <div class="d-block w-100 is-invalid" id="reg-spec">
+                Special character.
+            </div>
+            <div class="d-block w-100 is-invalid" id="reg-num">
+                Number.
+            </div>
         </div>
 
         <button type="submit" class="btn btn-light-blue">Register</button>
