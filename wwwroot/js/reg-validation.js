@@ -1,7 +1,9 @@
 $(function(){
-    $("#password").keydown(function()
+    let passwordSelector = $("#password");
+    
+    passwordSelector.keydown(function()
     {
-        let password = $(this).val();
+        let password = passwordSelector.text();
         let regCount = $("#regCount");
         if(password.length < 8)
         {
