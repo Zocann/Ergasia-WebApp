@@ -1,20 +1,18 @@
 $(function(){
     let passwordSelector = $("#password");
     
-    let password = passwordSelector.text();
-    
-    passwordSelector.keypress(function()
+    passwordSelector.keydown(function()
     {
+        let password = passwordSelector.text();
+        let regCount = $("#regCount");
         if(password.length < 8)
         {
-            $("#reg-count")
-                .attr("class", "invalid-feedback")
-                .text("Please enter " + (8 - password.length) + " more characters");
+            regCount.attr("class", "invalid-feedback");
+            regCount.text("Please enter " + (8 - password.length) + " more characters");
         } else
         {
-            $("#reg-count")
-                .attr("class", "valid-feedback")
-                .text("Password length looks great!");
+            regCount.attr("class", "valid-feedback");
+            regCount.text("Password length looks great!");
         }
     });
     
