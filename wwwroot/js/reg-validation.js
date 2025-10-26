@@ -1,10 +1,8 @@
 $(function(){
-    let passwordSelector = $("#password");
-    
-    passwordSelector.keydown(function()
+    $("#password").keydown(function()
     {
-        let password = passwordSelector.text();
-        let regCount = $("#regCount");
+        let password = $(this).val();
+        let regCount = $("#reg-count");
         if(password.length < 8)
         {
             regCount.attr("class", "invalid-feedback");
