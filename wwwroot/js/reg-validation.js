@@ -124,20 +124,22 @@ function validateNumber(str) {
 function checkPasswordMatch(password, confPassword) {
     if (password === confPassword) {
         $("#confirm-password").attr("class", "form-control mb-3 is-valid");
+        $("#pass-conf").hide();
         return true;
     }
     else
     {
         $("#confirm-password").attr("class", "form-control mb-3 is-invalid");
+        $("#pass-conf").hide();
         return false;
     }
 }
 function toggleRegisterButton(enable)
 {
     if (enable) {
-        $("#register-button").removeAttr("disabled");
+        $("#register-button").prop("disabled", false);
     }
     else {
-        $("#register-button").attr("disabled");
+        $("#register-button").prop("disabled", true);
     }
 }
