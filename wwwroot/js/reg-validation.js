@@ -51,7 +51,8 @@ function hasUpperCase(str) {
 }
 
 function hasSpecial(str) {
-    return (/^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/.test(str));
+    let format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+    return (format.test(str));
 }
 function hasNumber(str) {
     return (/[0-9]/.test(str));
