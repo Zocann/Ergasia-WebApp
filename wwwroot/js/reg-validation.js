@@ -13,28 +13,23 @@ $(function () {
             passwordCounter += 1;
         }
         
-        const hasUppercase = password.some(char => /[A-Z]/.test(char));
-        const hasLowercase = password.some(char => /[a-z]/.test(char));
-        const hasNumeric = password.some(char => !isNaN(char) && char !== ' ');
-        const hasSpecial = password.some(char => /[!@#$%^&*(),.?":{}|<>]/.test(char));
 
-
-        if (hasLowercase) {
+        if (hasLowerCase(password)) {
             $("#reg-low").hide();
             passwordCounter += 1;
         } else $("#reg-low").show();
 
-        if (hasUppercase) {
+        if (hasUpperCase(password)) {
             $("#reg-up").hide();
             passwordCounter += 1;
         } else $("#reg-up").show();
 
-        if (hasSpecial) {
+        if (hasSpecial(password)) {
             $("#reg-spec").hide();
             passwordCounter += 1;
         } else $("#reg-spec").show();
 
-        if (hasNumeric) {
+        if (hasNumber(password)) {
             $("#reg-num").hide();
             passwordCounter += 1;
         } else $("#reg-num").show();
@@ -45,5 +40,19 @@ $(function () {
             $("password").attr("class", "form-control mb-3 is-invalid");
         }
     });
-
 });
+
+function hasLowerCase(str) {
+    return (/[a-z]/.test(str));
+}
+
+function hasUpperCase(str) {
+    return (/[A-Z]/.test(str));
+}
+
+function hasSpecial(str) {
+    return (/^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/.test(str));
+}
+function hasNumber(str) {
+    return (/[0-9]/.test(str));
+}
