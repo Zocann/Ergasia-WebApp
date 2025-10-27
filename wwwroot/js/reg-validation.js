@@ -1,5 +1,5 @@
 $(function () {
-    $("#password").keydown(function () {
+    $("#password").on("input",function () {
         let password = $(this).val();
         let regCount = $("#reg-count");
         let passwordCounter = 0;
@@ -13,22 +13,22 @@ $(function () {
             passwordCounter += 1;
         }
 
-        if (hasLowerCase(password)) {
+        if (password.match(/[a-z]/)) {
             $("reg-low").hide();
             passwordCounter += 1;
         } else $("reg-low").show();
 
-        if (hasUpperCase(password)) {
+        if (password.match(/[A-Z]/)) {
             $("reg-up").hide();
             passwordCounter += 1;
         } else $("reg-up").show();
 
-        if (hasSpecialCharacter(password)) {
+        if (password.match(/[0-9]/)) {
             $("reg-spec").hide();
             passwordCounter += 1;
         } else $("reg-spec").show();
 
-        if (hasNumber(password)) {
+        if (password.match(/[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/)) {
             $("reg-num").hide();
             passwordCounter += 1;
         } else $("reg-num").show();
@@ -41,21 +41,3 @@ $(function () {
     });
 
 });
-
-function hasLowerCase(str) {
-    return str.toUpperCase() !== str;
-}
-
-function hasUpperCase(str) {
-    return str.toLowerCase() !== str;
-}
-
-function hasSpecialCharacter(str) {
-    const specialChars =
-        /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    return specialChars.test(str);
-}
-
-function hasNumber(myString) {
-    return /\d/.test(myString);
-}
