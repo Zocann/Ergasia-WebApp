@@ -1,59 +1,137 @@
 $(function () {
-    $("#password").on("input", function () {
-        let password = $(this).val();
-        let regCount = $("#reg-count");
-        let passwordCounter = 0;
+    let validPassword = false;
+    let validConfirmPassword = false;
+    
+    let passwordSelector = $("#password");
+    let passwordConfSelector = $("#confirm-password");
 
-        if (password.length < 8) {
-            regCount.show();
-            regCount.attr("class", "invalid-feedback");
-            regCount.text("Please enter " + (8 - password.length) + " more characters");
-        } else {
-            regCount.hide();
-            passwordCounter += 1;
-        }
+    //Show validations for password
+    passwordSelector.focus(function () {
+        $("#password-validation").show();
         
+    });
+    passwordSelector.focusout(function () {
+        $("#password-validation").hide();
+    });
 
-        if (hasLowerCase(password)) {
-            $("#reg-low").hide();
-            passwordCounter += 1;
-        } else $("#reg-low").show();
+    //Show validations for confirmation password
+    passwordConfSelector.focus(function () {
+        $("#conf-password-validation").show();
+    });
 
-        if (hasUpperCase(password)) {
-            $("#reg-up").hide();
-            passwordCounter += 1;
-        } else $("#reg-up").show();
+    passwordConfSelector.focusout(function () {
+        $("#conf-password-validation").hide();
+    });
 
-        if (hasSpecial(password)) {
-            $("#reg-spec").hide();
-            passwordCounter += 1;
-        } else $("#reg-spec").show();
-
-        if (hasNumber(password)) {
-            $("#reg-num").hide();
-            passwordCounter += 1;
-        } else $("#reg-num").show();
-
-        if (passwordCounter === 5) {
-            $("password").attr("class", "form-control mb-3 is-valid");
+    //Validate password
+    passwordSelector.on("input", function () {
+        let password = $(this).val();
+        
+        if (validatePassword(password) === 5) {
+            $("#password").attr("class", "form-control mb-3 is-valid");
+            validPassword = true;
         } else {
-            $("password").attr("class", "form-control mb-3 is-invalid");
+            $("#password").attr("class", "form-control mb-3 is-invalid");
+            validPassword = false;
         }
+
+        let passwordMatch = checkPasswordMatch($("#confirm-password").val(), passwordConfSelector.val());
+        toggleRegisterButton(passwordMatch);
+    });
+
+    //Validate confirmation password
+    passwordConfSelector.on("input", function () {
+        let passwordMatch = checkPasswordMatch($("#confirm-password").val(), passwordConfSelector.val());
+        toggleRegisterButton(passwordMatch);
     });
 });
 
-function hasLowerCase(str) {
-    return (/[a-z]/.test(str));
-}
 
-function hasUpperCase(str) {
-    return (/[A-Z]/.test(str));
+function validatePassword(password) {
+    let passCount = 0;
+    
+    if (validateLower(password)) passCount++;
+    if (validateUpper(password)) passCount++;
+    if (validateSpecial(password)) passCount++;
+    if (validateNumber(password)) passCount++;
+    if (validateLength(password)) passCount++;
+    
+    return passCount;
 }
-
-function hasSpecial(str) {
+function validateLength(password) {
+    let passCount = $("#pass-count");
+    if (password.length < 8) {
+        passCount.show();
+        passCount.text("Please enter " + (8 - password.length) + " more characters");
+        return false;
+    } else {
+        passCount.hide();
+        return true;
+    }
+}
+function validateLower(str) {
+    if (/[a-z]/.test(str)) {
+        $("#pass-low").hide();
+        return true;
+    } 
+    else {
+        $("#pass-low").show();
+        return false;
+    }
+}
+function validateUpper(str) {
+    if (/[A-Z]/.test(str)) {
+        $("#pass-up").hide();
+        return true;
+    }
+    else {
+        $("#pass-up").show();
+        return false;
+    }
+}
+function validateSpecial(str) {
     let format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    return (format.test(str));
+    
+    if (format.test(str)) {
+        $("#pass-spec").hide();
+        return true;
+    }
+    else {
+        $("#pass-spec").show();
+        return false;
+    }
 }
-function hasNumber(str) {
-    return (/[0-9]/.test(str));
+function validateNumber(str) {
+    if (/[0-9]/.test(str)) {
+        $("#pass-num").hide();
+        return true;
+    }
+    else {
+        $("#pass-num").show();
+        return false;
+    }
+}
+
+
+
+
+function checkPasswordMatch(password, confPassword) {
+    if (password === confPassword) {
+        $("#confirm-password").attr("class", "form-control mb-3 is-valid");
+        return true;
+    }
+    else
+    {
+        $("#confirm-password").attr("class", "form-control mb-3 is-invalid");
+        return false;
+    }
+}
+function toggleRegisterButton(enable)
+{
+    if (enable) {
+        $("#register-button").removeAttr("disabled");
+    }
+    else {
+        $("#register-button").attr("disabled");
+    }
 }
