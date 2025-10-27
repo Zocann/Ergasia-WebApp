@@ -1,5 +1,5 @@
 $(function () {
-    $("#password").on("input",function () {
+    $("#password").on("input", function () {
         let password = $(this).val();
         let regCount = $("#reg-count");
         let passwordCounter = 0;
@@ -12,23 +12,29 @@ $(function () {
             regCount.hide();
             passwordCounter += 1;
         }
+        
+        const hasUppercase = password.some(char => /[A-Z]/.test(char));
+        const hasLowercase = password.some(char => /[a-z]/.test(char));
+        const hasNumeric = password.some(char => !isNaN(char) && char !== ' ');
+        const hasSpecial = password.some(char => /[!@#$%^&*(),.?":{}|<>]/.test(char));
 
-        if (password.match(/[a-z]/)) {
+
+        if (hasLowercase) {
             $("reg-low").hide();
             passwordCounter += 1;
         } else $("reg-low").show();
 
-        if (password.match(/[A-Z]/)) {
+        if (hasUppercase) {
             $("reg-up").hide();
             passwordCounter += 1;
         } else $("reg-up").show();
 
-        if (password.match(/[0-9]/)) {
+        if (hasSpecial) {
             $("reg-spec").hide();
             passwordCounter += 1;
         } else $("reg-spec").show();
 
-        if (password.match(/[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/)) {
+        if (hasNumeric) {
             $("reg-num").hide();
             passwordCounter += 1;
         } else $("reg-num").show();
