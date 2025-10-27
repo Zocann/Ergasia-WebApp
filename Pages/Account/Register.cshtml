@@ -71,13 +71,13 @@
             <label for="address">Address</label>
         </div>
 
-        <div class="form-floating mb-3 col-md-3">
+        <div class="form-floating mb-3 col-md-4">
             <input type="date" class="form-control mb-3" name="date" id="date" aria-label="date" required
                    max="@{var maxDate = DateTime.Parse(DateTime.UtcNow.AddYears(-18).ToString(CultureInfo.CurrentCulture)); @maxDate.ToString("yyyy-MM-dd")}">
             <label for="date">Date of birth</label>
         </div>
 
-        <div class="form-floating mb-3 col-md-6">
+        <div class="form-floating mb-3 col-md-5">
             <input type="password" class="form-control mb-3 is-invalid" name="Password" id="password"
                    required
                    aria-label="Password"/>
@@ -110,8 +110,10 @@
                    aria-label="Confirm password"/>
             <label for="password">Confirm password</label>
 
-            <div class="w-100 invalid-feedback" id="conf-password-validation">
-                Passwords do not match.
+            <div id="conf-password-validation">
+                <div class="w-100 invalid-feedback" id="pass-conf">
+                    Passwords do not match.
+                </div>
             </div>
         </div>
         <button type="submit" class="btn btn-light-blue" id="register-button" disabled>Register</button>

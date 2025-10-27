@@ -1,6 +1,5 @@
 $(function () {
     let validPassword = false;
-    let validConfirmPassword = false;
     
     let passwordSelector = $("#password");
     let passwordConfSelector = $("#confirm-password");
@@ -29,20 +28,27 @@ $(function () {
         
         if (validatePassword(password) === 5) {
             $("#password").attr("class", "form-control mb-3 is-valid");
+            
+            let passwordMatch = checkPasswordMatch(passwordSelector.val(), passwordConfSelector.val());
+            toggleRegisterButton(passwordMatch);
             validPassword = true;
+            
         } else {
             $("#password").attr("class", "form-control mb-3 is-invalid");
-            validPassword = false;
+            toggleRegisterButton(false);
         }
-
-        let passwordMatch = checkPasswordMatch($("#confirm-password").val(), passwordConfSelector.val());
-        toggleRegisterButton(passwordMatch);
     });
 
     //Validate confirmation password
     passwordConfSelector.on("input", function () {
-        let passwordMatch = checkPasswordMatch($("#confirm-password").val(), passwordConfSelector.val());
-        toggleRegisterButton(passwordMatch);
+        if (validPassword)
+        {
+            let passwordMatch = checkPasswordMatch(passwordSelector.val(), passwordConfSelector.val());
+            toggleRegisterButton(passwordMatch);
+        } else
+        {
+            toggleRegisterButton(false);
+        }
     });
 });
 
