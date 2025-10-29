@@ -8,12 +8,9 @@ using Ergasia_WebApp.Services;
 
 namespace Ergasia_WebApp.ApiRepositories;
 
-public class UserApiRepository(IHttpContextAccessor contextAccessor, IHttpClientFactory clientFactory)
+public class UserApiRepository(IHttpClientFactory clientFactory)
     : IUserApiRepository
 {
-    public required HttpContext Context =
-        contextAccessor.HttpContext ?? throw new InvalidOperationException("No HttpContextAccessor");
-
     private readonly HttpClient _client = clientFactory.CreateClient("API");
 
     public async Task<UserDto?> GetAsync(string userId, string accessToken)
@@ -116,7 +113,9 @@ public class UserApiRepository(IHttpContextAccessor contextAccessor, IHttpClient
 
     private bool ManageResponse(HttpResponseMessage response)
     {
-        if (response.StatusCode == HttpStatusCode.Unauthorized) Context.Response.StatusCode = 401;
+        var httpContextAccessor = new HttpContextAccessor();
+        if (httpContextAccessor.HttpContext == null) throw new ApplicationException("No context accessor");
+        if (response.StatusCode == HttpStatusCode.Unauthorized) httpContextAccessor.HttpContext.Response.StatusCode = 401;
         return response.IsSuccessStatusCode;
     }
 }
