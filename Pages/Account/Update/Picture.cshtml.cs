@@ -26,7 +26,7 @@ public class Picture(IUserApiRepository userApiRepository) : PageModel
         if (_clientData.AccessToken == null) return Unauthorized();
         if (_clientData.Id == null) return RedirectToPage("/Error");
         
-        var user = await userApiRepository.UploadAsync(file, _clientData.Id, _clientData.AccessToken);
+        var user = await userApiRepository.UploadPictureAsync(file, _clientData.Id, _clientData.AccessToken);
 
         if (user == null)
         {

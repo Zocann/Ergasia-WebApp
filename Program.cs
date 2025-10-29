@@ -14,7 +14,7 @@ builder.Services.AddCors(policy =>
 builder.Services.AddRazorPages();
 
 builder.Services.AddHttpClient(
-    "API", (HttpClient client) => 
+    "API", (client) => 
         client.BaseAddress = new Uri(builder.Configuration.GetSection("API").GetValue<string>("BaseAddress") 
                                      ?? throw new InvalidOperationException("No API base address found")));
 

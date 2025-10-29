@@ -72,7 +72,7 @@ public class UserApiRepository(IHttpContextAccessor contextAccessor, IHttpClient
         return JsonSerializerService.Deserialize<UserDto>(responseString);
     }
 
-    public async Task<UserDto?> UploadAsync(IFormFile file, string userId, string accessToken)
+    public async Task<UserDto?> UploadPictureAsync(IFormFile file, string userId, string accessToken)
     {
         RegisterAuthorizationHeader(accessToken);
         
@@ -91,6 +91,21 @@ public class UserApiRepository(IHttpContextAccessor contextAccessor, IHttpClient
 
         var responseString = await response.Content.ReadAsStringAsync();
         return JsonSerializerService.Deserialize<UserDto>(responseString);
+    }
+
+    public async Task<UserDto?> RefreshTokensAsync(string refreshToken)
+    {
+        _client.DefaultRequestHeaders.Add("Cookie", $"refreshToken={refreshToken}");
+        
+        var response = await _client.GetAsync("Users/refresh-token");
+        
+        if (response.IsSuccessStatusCode)
+        {
+            var responseString = await response.Content.ReadAsStringAsync();
+            return JsonSerializerService.Deserialize<UserDto>(responseString);
+        }
+
+        return null;
     }
 
     private void RegisterAuthorizationHeader(string accessToken)

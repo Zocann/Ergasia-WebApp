@@ -9,5 +9,7 @@ public interface IUserApiRepository
     public Task<string?> GetRoleAsync(string userId, string accessToken);
     public Task<UserDto?> LoginAsync(LoginDto loginDto);
     public Task<UserDto?> RegisterAsync(RegisterDto registerDto, string role);
-    public Task<UserDto?> UploadAsync(IFormFile file, string userId, string accessToken);
+    public Task<UserDto?> UploadPictureAsync(IFormFile file, string userId, string accessToken);
+    
+    public Task<UserDto?> RefreshTokensAsync(string refreshToken);
 }

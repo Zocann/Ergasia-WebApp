@@ -4,12 +4,12 @@ namespace Ergasia_WebApp.Services;
 
 public static class JsonSerializerService
 {
-    public static readonly JsonSerializerOptions WriteOptions = new()
+    private static readonly JsonSerializerOptions WriteOptions = new()
     {
         WriteIndented = true
     };
 
-    public static readonly JsonSerializerOptions? ReadOptions = new()
+    private static readonly JsonSerializerOptions? ReadOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true
