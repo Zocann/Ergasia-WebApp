@@ -18,8 +18,8 @@ public class Index(IJobApiRepository jobApiRepository) : PageModel
     
     public async Task<IActionResult> OnGetAsync()
     {
-        if (!_clientData.GetId()) return RedirectToPage("/Error");
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
 
         var workerJobs = (await jobApiRepository.GetWorkerJobsByWorkerIdAsync(WorkerId, _clientData.AccessToken));
 

@@ -20,7 +20,7 @@ public class Profile(IEmployerApiRepository employerApiRepository, IRatingApiRep
     
     public async Task<IActionResult> OnGetAsync()
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
         
         var employer = await employerApiRepository.GetAsync(EmployerId, _clientData.AccessToken);
         if (employer == null)

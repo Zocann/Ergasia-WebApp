@@ -20,8 +20,8 @@ public class AddReview(IWorkerApiRepository workerApiRepository, IRatingApiRepos
 
     public async Task<IActionResult> OnGetAsync(string? error)
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
-        if (!_clientData.GetId()) return RedirectToPage("/Error");
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
 
         var worker = await workerApiRepository.GetAsync(WorkerId, _clientData.AccessToken);
         if (worker == null)
@@ -44,8 +44,8 @@ public class AddReview(IWorkerApiRepository workerApiRepository, IRatingApiRepos
         {
             return RedirectToAction(nameof(OnGetAsync), new {error = "Please provide a valid rating"});
         }
-        if (!_clientData.GetAccessToken()) return Unauthorized();
-        if (!_clientData.GetId()) return RedirectToPage("/Error");
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
         
         if (delete == "true")
         {

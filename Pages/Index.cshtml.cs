@@ -15,30 +15,28 @@ public class IndexModel(IJobApiRepository jobApiRepository, IRatingApiRepository
     
     public async Task<IActionResult> OnGetAsync(string? error)
     {
-
+        Dictionary<string, decimal?> allAverageRatings = new();
         var result = await jobApiRepository.GetAllUpcomingAsync();
-
+        
         if (result != null)
         {
             if (Response.StatusCode == 401) return Unauthorized();
 
             var jobs = result.ToList();
-            jobs.RemoveAll(j => j == null);
-
             foreach (var job in jobs)
             {
-                if (job?.EmployerId == null || job.Id == null) break;
+                if (job.EmployerId == null || job.Id == null) break;
 
                 var averageRating = await ratingApiRepository.GetEmployerAverageRating(job.EmployerId);
                 if (averageRating == null) continue;
 
-                AverageRatings.Add(job.Id, averageRating);
+                allAverageRatings.Add(job.Id, averageRating);
             }
 
-            //Take only 6 best rated employers
-            var ordered = AverageRatings.OrderBy(ar => ar.Value).Take(4).ToDictionary();
+            //Take only 4 best rated employers
+            AverageRatings = allAverageRatings.OrderBy(ar => ar.Value).Take(4).ToDictionary();
 
-            Jobs = jobs.TakeWhile(j => AverageRatings.ContainsKey(j!.Id)).ToList();
+            Jobs = jobs.TakeWhile(j => j.Id != null && AverageRatings.ContainsKey(j.Id)).ToList();
         }
 
         Error = error;

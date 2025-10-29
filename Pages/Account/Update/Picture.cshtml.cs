@@ -23,8 +23,8 @@ public class Picture(IUserApiRepository userApiRepository) : PageModel
         var extension = Path.GetExtension(file.FileName);
         if (string.IsNullOrEmpty(extension)) return RedirectToAction(nameof(OnGet), new {error = "Invalid file extension"});
         
-        if (!_clientData.GetAccessToken()) return Unauthorized();
-        if (!_clientData.GetId()) return RedirectToPage("/Error");
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
         
         var user = await userApiRepository.UploadAsync(file, _clientData.Id, _clientData.AccessToken);
 

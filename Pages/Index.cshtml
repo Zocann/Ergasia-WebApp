@@ -41,7 +41,7 @@
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 mt-3 ms-md-0 me-md-0">
                 @foreach (var job in jobs)
                 {
-                    if (job?.Id == null) continue;
+                    if (job.Id == null) continue;
                     <div class="col">
                         <div class="card border-dark-blue text-center h-100 w-auto">
                             <div class="card-header bg-white">
@@ -94,13 +94,4 @@
         <a asp-page="/Information">More information about this site</a>
     </i>
 </div>
-
-
-<script>
-    window.onload = (event) => {
-        var formToast = document.getElementById('formToast')
-        var toastForm = new bootstrap.Toast(formToast);
-        toastForm.show()
-    }
-</script>
 

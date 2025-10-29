@@ -19,8 +19,8 @@ public class AddReview(IJobApiRepository jobApiRepository, IRatingApiRepository 
 
     public async Task<IActionResult> OnGetAsync(string? error)
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
-        if (!_clientData.GetId()) return RedirectToPage("/Error");
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
 
         var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
         if (job == null)
@@ -43,8 +43,8 @@ public class AddReview(IJobApiRepository jobApiRepository, IRatingApiRepository 
         {
             return RedirectToAction(nameof(OnGetAsync), new {error = "Please provide a valid rating"});
         }
-        if (!_clientData.GetAccessToken()) return Unauthorized();
-        if (!_clientData.GetId()) return RedirectToPage("/Error");
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
 
         if (delete == "true")
         {

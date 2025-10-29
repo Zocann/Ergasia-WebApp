@@ -115,7 +115,7 @@
     <div class="d-none d-lg-block" style="flex: 1"></div>
 </div>
 
-@if (Model.JobDto.DateOfBegin.AddDays(Model.JobDto.Duration) < DateTime.UtcNow && Model.WorkerJobs.Any())
+@if (Model.JobDto.DateOfBegin.AddDays(Model.JobDto.Duration) < DateTime.UtcNow && Model.WorkerJobs != null)
 {
     <div class="mt-5 mb-3 ms-2">
         <span class="badge border border-warning text-dark">
@@ -127,7 +127,6 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0">
         @foreach (var workerJob in Model.WorkerJobs)
         {
-            if (workerJob == null) break;
             <div class="col">
                 <div class="card border-dark-blue text-center h-100 w-auto">
                     <div class="card-header bg-white">

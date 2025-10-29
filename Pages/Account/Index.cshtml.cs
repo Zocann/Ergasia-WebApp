@@ -19,9 +19,9 @@ public class Index(IEmployerApiRepository employerApiRepository, IWorkerApiRepos
     
     public async Task<IActionResult> OnGet()
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
-        if (!_clientData.GetId()) return RedirectToPage("/Error");
-        if (!_clientData.GetRole()) return RedirectToPage("/Error");
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
+        if (_clientData.Role == null) return RedirectToPage("/Error");
         
         switch (_clientData.Role)
         {

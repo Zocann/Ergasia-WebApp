@@ -24,7 +24,7 @@ public class Add(IJobApiRepository jobApiRepository) : PageModel
         {
             return RedirectToAction(nameof(OnGet), new {error = "Please follow form instructions."});
         }
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
         
         jobDto.DateOfBegin = dateOfBegin;
         jobDto.EmployerId = Request.Cookies["userId"];

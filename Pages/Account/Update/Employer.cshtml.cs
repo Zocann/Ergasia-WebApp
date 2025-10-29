@@ -18,7 +18,7 @@ public class Employer(IEmployerApiRepository employerApiRepository) : PageModel
     
     public async Task<IActionResult> OnGetAsync(string? error)
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
 
         var employer = await employerApiRepository.GetAsync(EmployerId, _clientData.AccessToken);
         if (employer == null)
@@ -36,7 +36,7 @@ public class Employer(IEmployerApiRepository employerApiRepository) : PageModel
         if (!DateTime.TryParse(date, out var dateOfBirth)) return RedirectToAction(nameof(OnGetAsync), new {error = "Invalid date of birth."});
         if (!ModelState.IsValid)
             return RedirectToAction(nameof(OnGetAsync), new {error = "Please follow form instructions."});
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
 
         employerDto.DateOfBirth = dateOfBirth;
         var employer = await employerApiRepository.PatchAsync(employerDto, _clientData.AccessToken);

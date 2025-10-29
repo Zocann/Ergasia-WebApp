@@ -13,15 +13,6 @@ $(function () {
         $("#password-validation").hide();
     });
 
-    //Show validations for confirmation password
-    passwordConfSelector.focus(function () {
-        $("#conf-password-validation").show();
-    });
-
-    passwordConfSelector.focusout(function () {
-        $("#conf-password-validation").hide();
-    });
-
     //Validate password
     passwordSelector.on("input", function () {
         let password = $(this).val();
@@ -124,13 +115,11 @@ function validateNumber(str) {
 function checkPasswordMatch(password, confPassword) {
     if (password === confPassword) {
         $("#confirm-password").attr("class", "form-control mb-3 is-valid");
-        $("#pass-conf").hide();
         return true;
     }
     else
     {
         $("#confirm-password").attr("class", "form-control mb-3 is-invalid");
-        $("#pass-conf").hide();
         return false;
     }
 }

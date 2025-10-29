@@ -15,7 +15,7 @@ public class Index(IWorkerApiRepository workerApiRepository, IRatingApiRepositor
 
     public async Task<IActionResult> OnGet()
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
 
         var workers = await workerApiRepository.GetAllAsync(_clientData.AccessToken);
         if (workers == null)

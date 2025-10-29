@@ -18,9 +18,9 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
     public string? Error { get; set; }
     
     public async Task<IActionResult> OnGetAsync(string? error)
-    {
-       if (!_clientData.GetAccessToken()) return Unauthorized();
-       if (!_clientData.GetId()) return RedirectToPage("/Error");
+    { 
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
        
         var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
         if (job == null)
@@ -38,8 +38,8 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
 
     public async Task<IActionResult> OnPostAsync(string workerId, string method)
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
-        if (!_clientData.GetId()) return RedirectToPage("/Error");
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
 
         switch (method)
         {

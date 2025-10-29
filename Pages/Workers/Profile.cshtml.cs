@@ -20,9 +20,9 @@ public class Profile(IWorkerApiRepository workerApiRepository, IRatingApiReposit
     
     public async Task<IActionResult> OnGetAsync()
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
 
-        var worker = await workerApiRepository.GetAsync(WorkerId, _clientData.AccessToken!);
+        var worker = await workerApiRepository.GetAsync(WorkerId, _clientData.AccessToken);
         if (worker == null)
         {
             if (Response.StatusCode == 401) return Unauthorized();

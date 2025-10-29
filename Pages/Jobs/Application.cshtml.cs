@@ -18,8 +18,8 @@ public class Application(IJobApiRepository jobApiRepository) : PageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
-        if (!_clientData.GetId()) return RedirectToPage("/Error");
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
 
         var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
         if (job?.Id == null)
@@ -37,8 +37,8 @@ public class Application(IJobApiRepository jobApiRepository) : PageModel
 
     public async Task<IActionResult> OnPostAsync(string message)
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
-        if (!_clientData.GetId()) return RedirectToPage("/Error");
+        if (_clientData.AccessToken == null) return Unauthorized();
+        if (_clientData.Id == null) return RedirectToPage("/Error");
         
         var jobRequest = await jobApiRepository.PostJobRequestAsync(JobId, _clientData.Id, message, _clientData.AccessToken);
 

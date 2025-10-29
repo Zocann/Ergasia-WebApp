@@ -17,7 +17,7 @@ public class Update(IJobApiRepository jobApiRepository) : PageModel
     
     public async Task<IActionResult> OnGetAsync(string? error)
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
         
         var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
         if (job?.Id == null)
@@ -43,7 +43,7 @@ public class Update(IJobApiRepository jobApiRepository) : PageModel
         jobDto.EmployerId = Request.Cookies["userId"];
         if (jobDto.EmployerId == null || jobDto.Id == null) return RedirectToPage("/Error");
         
-        if (! _clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
         
         //Checking for existing workerJobs to not change date if there are already signed workers
         var workerJob = await jobApiRepository.GetWorkerJobsByJobIdAsync(jobDto.Id, _clientData.AccessToken);

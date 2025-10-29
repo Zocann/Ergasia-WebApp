@@ -79,7 +79,7 @@
 
         <div class="form-floating mb-3 col-md-5">
             <input type="password" class="form-control mb-3 is-invalid" name="Password" id="password"
-                   required
+                   required autocomplete="off">
                    aria-label="Password"/>
             <label for="password">Password</label>
 
@@ -104,17 +104,11 @@
             </div>
         </div>
 
-        <div class="form-floating mb-3 col-md-5 ms-md-3">
+        <div class="form-floating mb-3 col-md-5 ms-md-5">
             <input type="password" class="form-control mb-3 is-invalid" name="ConfirmPassword" id="confirm-password"
-                   required
+                   required autocomplete="off">
                    aria-label="Confirm password"/>
             <label for="password">Confirm password</label>
-
-            <div id="conf-password-validation">
-                <div class="w-100 invalid-feedback" id="pass-conf">
-                    Passwords do not match.
-                </div>
-            </div>
         </div>
         <button type="submit" class="btn btn-light-blue" id="register-button" disabled>Register</button>
     </form>

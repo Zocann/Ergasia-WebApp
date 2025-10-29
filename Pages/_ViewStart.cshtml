@@ -3,7 +3,7 @@
 @{
     Layout = "_Layout";
     
-    if (HttpContextAccessor != null && HttpContextAccessor.HttpContext != null)
+    if (HttpContextAccessor?.HttpContext != null)
     {
         foreach (var cookie in HttpContextAccessor.HttpContext.Request.Cookies)
         {

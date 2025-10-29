@@ -16,7 +16,7 @@ public class Index(IJobApiRepository jobApiRepository, IRatingApiRepository rati
 
     public async Task<IActionResult> OnGet()
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
 
         var jobs = await jobApiRepository.GetAllUpcomingAsync();
 

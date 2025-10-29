@@ -18,9 +18,9 @@ public class Information(IJobApiRepository jobApiRepository, IRatingApiRepositor
     
     public async Task<IActionResult> OnGetAsync()
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
         
-        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken!);
+        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
         if (job?.Id == null)
         {
             if (Response.StatusCode == 401) return Unauthorized();
@@ -28,7 +28,7 @@ public class Information(IJobApiRepository jobApiRepository, IRatingApiRepositor
         }
         JobDto = job;
 
-        var workerJobs = await jobApiRepository.GetWorkerJobsByJobIdAsync(job.Id, _clientData.AccessToken!);
+        var workerJobs = await jobApiRepository.GetWorkerJobsByJobIdAsync(job.Id, _clientData.AccessToken);
         if (workerJobs != null)
         {
             workerJobs.RemoveAll(j => j.NumericalRating == null);

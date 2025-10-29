@@ -18,7 +18,7 @@ public class Worker(IWorkerApiRepository workerApiRepository) : PageModel
     
     public async Task<IActionResult> OnGetAsync(string? error)
     {
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
 
         var worker = await workerApiRepository.GetAsync(WorkerId, _clientData.AccessToken);
         if (worker == null)
@@ -36,7 +36,7 @@ public class Worker(IWorkerApiRepository workerApiRepository) : PageModel
         if (!DateTime.TryParse(date, out var dateOfBirth)) return RedirectToAction(nameof(OnGetAsync), new {error = "Invalid date of birth."});
         if (!ModelState.IsValid)
             return RedirectToAction(nameof(OnGetAsync), new {error = "Please follow form instructions."});
-        if (!_clientData.GetAccessToken()) return Unauthorized();
+        if (_clientData.AccessToken == null) return Unauthorized();
 
         workerDto.DateOfBirth = dateOfBirth;
         var worker = await workerApiRepository.PatchAsync(workerDto, _clientData.AccessToken);
