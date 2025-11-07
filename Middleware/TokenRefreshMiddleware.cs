@@ -60,9 +60,8 @@ public class TokenRefreshMiddleware(RequestDelegate next)
                         context.Response.Redirect(path);
                     }
                 }
-                else context.Response.Redirect("/Account/Logout");
+                context.Response.Redirect("/Account/Logout");
             }
-            else context.Response.Redirect("/Account/Logout");
         }
     }
 }
