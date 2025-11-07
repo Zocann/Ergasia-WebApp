@@ -36,6 +36,7 @@ public class IndexModel(IJobApiRepository jobApiRepository, IRatingApiRepository
             //Take only 4 best rated employers
             AverageRatings = allAverageRatings.OrderByDescending(ar => ar.Value).Take(4).ToDictionary();
 
+            
             foreach (var averageRating in AverageRatings)
             {
                 var job = jobs.FirstOrDefault(j => j.Id == averageRating.Key);
