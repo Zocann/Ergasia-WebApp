@@ -63,7 +63,7 @@
 
                             <div class="card-header bg-white">
                                 <div class="d-flex justify-content-evenly">
-                                    <div class="Stars" style="--rating: @Model.AverageRatings[job.Id]">
+                                    <div class="Stars" style="--rating: @Model.AverageRatings[job.Id].ToString(System.Globalization.CultureInfo.InvariantCulture)">
                                     </div>
                                 </div>
                             </div>

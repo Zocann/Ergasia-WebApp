@@ -12,20 +12,19 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 ms-5 me-5 ms-md-0 me-md-0 mt-5">
         @foreach (var worker in workers)
         {
-            if (worker == null) break;
             <div class="col">
-                <div class="card border-dark me-3 bg-white h-100" style="width: 18rem;">
+                <div class="card border-dark me-3 bg-white h-100" style="width: 18rem">
                     <img class="card-img-top" src="
                     @if (worker.PictureUrl != null) { @worker.PictureUrl } else { @("/images/NoProfilePicture.jpg") }"
-                         alt="Card image cap">
+                         alt="Card image cap" style="height: 30vh; object-fit: cover">
                     <div class="card-header bg-white">
                         <h5 class="card-title">@worker.FirstName @worker.LastName</h5>
                     </div>
-                    @if (Model.AverageRating.ContainsKey(worker.Id))
+                    @if (Model.AverageRating.TryGetValue(worker.Id, out var value))
                     {
                         <div class="card-header bg-white">
                             <div class="d-flex justify-content-evenly">
-                                <div class="Stars" style="--rating: @Model.AverageRating[worker.Id]">
+                                <div class="Stars" style="--rating: @value.ToString(System.Globalization.CultureInfo.InvariantCulture)">
                                 </div>
                             </div>
                         </div>
