@@ -11,4 +11,8 @@
       <PackageReference Include="jQuery" Version="3.7.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Data\Enums\" />
+    </ItemGroup>
+
 </Project>

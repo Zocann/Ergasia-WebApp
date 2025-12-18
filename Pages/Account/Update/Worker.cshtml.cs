@@ -1,17 +1,17 @@
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.Data;
 using Ergasia_WebApp.DTOs.Worker;
+using Ergasia_WebApp.Services.Interfaces;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Account.Update;
 
-public class Worker(IWorkerApiRepository workerApiRepository) : PageModel
+public class Worker(IWorkerService workerService, ICookieService cookieService) : PageModel
 {
     private ClientData _clientData = new(new HttpContextAccessor());
-    
-    [BindProperty(SupportsGet = true)] 
-    public required string WorkerId { get; set; }
+    [BindProperty(SupportsGet = true)] public required string WorkerId { get; set; }
     public required WorkerDto WorkerDto { get; set; }
     public string? Error;
 
@@ -20,13 +20,14 @@ public class Worker(IWorkerApiRepository workerApiRepository) : PageModel
     {
         if (_clientData.AccessToken == null) return Unauthorized();
 
-        var worker = await workerApiRepository.GetAsync(WorkerId, _clientData.AccessToken);
-        if (worker == null)
+        var serviceResult = await workerService.GetAsync(WorkerId, _clientData.AccessToken);
+        if (! serviceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
+            if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
             return RedirectToPage("/Error");
         }
-        WorkerDto = worker;
+
+        WorkerDto = serviceResult.Data;
         Error = error;
         return Page();
     }
@@ -39,13 +40,15 @@ public class Worker(IWorkerApiRepository workerApiRepository) : PageModel
         if (_clientData.AccessToken == null) return Unauthorized();
 
         workerDto.DateOfBirth = dateOfBirth;
-        var worker = await workerApiRepository.PatchAsync(workerDto, _clientData.AccessToken);
-        if (worker == null)
+        var serviceResult = await workerService.PatchAsync(workerDto, _clientData.AccessToken);
+
+        if (serviceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
-            return RedirectToPage("/Error");
+            cookieService.AddCookie("userName", $"{workerDto.FirstName} {workerDto.LastName}");
+            return RedirectToAction(nameof(OnGetAsync));
         }
         
-        return RedirectToAction(nameof(OnGetAsync));
+        if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
     }
 }

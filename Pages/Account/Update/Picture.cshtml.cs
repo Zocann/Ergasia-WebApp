@@ -1,11 +1,12 @@
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.Data;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Account.Update;
 
-public class Picture(IUserApiRepository userApiRepository) : PageModel
+public class Picture(IUserService userService) : PageModel
 {
     private ClientData _clientData = new(new HttpContextAccessor());
     public string? Error { get; set; }
@@ -18,7 +19,7 @@ public class Picture(IUserApiRepository userApiRepository) : PageModel
     public async Task<IActionResult> OnPostAsync([FromForm]IFormFile file)
     {
         if (file.Length == 0) return RedirectToAction(nameof(OnGet), new {error = "Invalid file"});
-        if (file.ContentType != "image/jpeg" && file.ContentType != "image/png") return RedirectToAction(nameof(OnGet), new {error = "Invalid file type. Available file types are jpg, jpeg, png"});
+        if (IsInvalidFileType(file)) return RedirectToAction(nameof(OnGet), new {error = "Invalid file type. Available file types are jpg, jpeg, png"});
         
         var extension = Path.GetExtension(file.FileName);
         if (string.IsNullOrEmpty(extension)) return RedirectToAction(nameof(OnGet), new {error = "Invalid file extension"});
@@ -26,14 +27,17 @@ public class Picture(IUserApiRepository userApiRepository) : PageModel
         if (_clientData.AccessToken == null) return Unauthorized();
         if (_clientData.Id == null) return RedirectToPage("/Error");
         
-        var user = await userApiRepository.UploadPictureAsync(file, _clientData.Id, _clientData.AccessToken);
+        var serviceResult = await userService.UploadPictureAsync(file, _clientData.Id, _clientData.AccessToken);
 
-        if (user == null)
-        {
-            if (Response.StatusCode == 401) return Unauthorized();
-            return RedirectToPage("/Error");
-        }
+        if (serviceResult.IsSuccess) return RedirectToPage("/Account/Index");
+        
+        if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
 
-        return RedirectToPage("/Account/Index");
+    }
+
+    private static bool IsInvalidFileType(IFormFile file)
+    {
+        return file.ContentType != "image/jpeg" && file.ContentType != "image/png";
     }
 }

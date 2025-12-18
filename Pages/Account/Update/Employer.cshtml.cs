@@ -1,17 +1,17 @@
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.Data;
 using Ergasia_WebApp.DTOs.Employer;
+using Ergasia_WebApp.Services.Interfaces;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Account.Update;
 
-public class Employer(IEmployerApiRepository employerApiRepository) : PageModel
+public class Employer(IEmployerService employerService, ICookieService cookieService) : PageModel
 {
     private ClientData _clientData = new(new HttpContextAccessor());
-    
-    [BindProperty(SupportsGet = true)] 
-    public required string EmployerId { get; set; }
+    [BindProperty(SupportsGet = true)] public required string EmployerId { get; set; }
     public required EmployerDto EmployerDto { get; set; }
     public string? Error;
 
@@ -20,32 +20,37 @@ public class Employer(IEmployerApiRepository employerApiRepository) : PageModel
     {
         if (_clientData.AccessToken == null) return Unauthorized();
 
-        var employer = await employerApiRepository.GetAsync(EmployerId, _clientData.AccessToken);
-        if (employer == null)
+        var serviceResult = await employerService.GetAsync(EmployerId, _clientData.AccessToken);
+
+        if (!serviceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
+            if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
             return RedirectToPage("/Error");
         }
-        EmployerDto = employer;
+
+        EmployerDto = serviceResult.Data;
         Error = error;
         return Page();
     }
     
     public async Task<IActionResult> OnPostAsync(EmployerDto employerDto, string date)
     {
-        if (!DateTime.TryParse(date, out var dateOfBirth)) return RedirectToAction(nameof(OnGetAsync), new {error = "Invalid date of birth."});
-        if (!ModelState.IsValid)
+        if (! DateTime.TryParse(date, out var dateOfBirth)) return RedirectToAction(nameof(OnGetAsync), new {error = "Invalid date of birth."});
+        if (! ModelState.IsValid)
             return RedirectToAction(nameof(OnGetAsync), new {error = "Please follow form instructions."});
         if (_clientData.AccessToken == null) return Unauthorized();
 
         employerDto.DateOfBirth = dateOfBirth;
-        var employer = await employerApiRepository.PatchAsync(employerDto, _clientData.AccessToken);
-        if (employer == null)
+        var serviceResult = await employerService.PatchAsync(employerDto, _clientData.AccessToken);
+
+        if (serviceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
-            return RedirectToPage("/Error");
+            cookieService.AddCookie("userName", $"{employerDto.FirstName} {employerDto.LastName}");
+            return RedirectToAction(nameof(OnGetAsync));
         }
         
-        return RedirectToAction(nameof(OnGetAsync));
+        if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
+
     }
 }

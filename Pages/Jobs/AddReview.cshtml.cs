@@ -1,13 +1,16 @@
 using System.ComponentModel.DataAnnotations;
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.Data;
 using Ergasia_WebApp.DTOs.Job;
+using Ergasia_WebApp.DTOs.Rating;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
 
 namespace Ergasia_WebApp.Pages.Jobs;
 
-public class AddReview(IJobApiRepository jobApiRepository, IRatingApiRepository ratingApiRepository) : PageModel
+public class AddReview(IJobService jobService, IWorkerJobService workerJobService, IJobRatingService jobRatingService) : PageModel
 {
     private ClientData _clientData = new(new HttpContextAccessor());
 
@@ -22,49 +25,49 @@ public class AddReview(IJobApiRepository jobApiRepository, IRatingApiRepository 
         if (_clientData.AccessToken == null) return Unauthorized();
         if (_clientData.Id == null) return RedirectToPage("/Error");
 
-        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
-        if (job == null)
+        var serviceResult = await jobService.GetAsync(JobId, _clientData.AccessToken);
+        if (! serviceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
+            if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
             return RedirectToPage("/Error");
         }
 
-        Job = job;
-        Rating = await jobApiRepository.GetWorkerJobAsync(JobId, _clientData.Id, _clientData.AccessToken);
+        Job = serviceResult.Data;
+        
+        var ratingsServiceResult = await workerJobService.GetAsync(JobId, _clientData.Id, _clientData.AccessToken);
+        Rating = ratingsServiceResult.Data;
         Error = error;
         
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync(string employerId, [Required][Range(1, 5)]string rating,
+    public async Task<IActionResult> OnPostAsync(string employerId, [Required][Range(1, 5)]int rating,
         string verRating, string? delete)
     {
-        if (!ModelState.IsValid)
-        {
-            return RedirectToAction(nameof(OnGetAsync), new {error = "Please provide a valid rating"});
-        }
+        if (!ModelState.IsValid) return RedirectToAction(nameof(OnGetAsync), new {error = "Please provide a valid rating"});
         if (_clientData.AccessToken == null) return Unauthorized();
         if (_clientData.Id == null) return RedirectToPage("/Error");
 
-        if (delete == "true")
-        {
-            if (!await ratingApiRepository.DeleteJobRatingAsync(employerId, JobId, _clientData.Id, _clientData.AccessToken))
-            {
-                if (Response.StatusCode == 401) return Unauthorized();
-                return RedirectToPage("/Error");
-            }
+        if (delete == "true") return await HandleDeleteAsync(employerId, JobId, _clientData.Id, _clientData.AccessToken);
 
-            return RedirectToAction(nameof(OnGetAsync));
-        }
+        return await HandleUpdateAsync(new JobRatingDto(JobId, _clientData.Id, rating, verRating), employerId, _clientData.AccessToken);
+    }
 
-        var workerJob = await ratingApiRepository.PatchJobRatingAsync(employerId, JobId, _clientData.Id, rating, verRating, _clientData.AccessToken);
-
-        if (workerJob == null)
-        {
-            if (Response.StatusCode == 401) return Unauthorized();
-            return RedirectToPage("/Error");
-        }
-
-        return RedirectToAction(nameof(OnGetAsync));
+    private async Task<IActionResult> HandleDeleteAsync(string employerId, string jobId, string clientId, string accessToken)
+    {
+        var serviceResult = await jobRatingService.DeleteAsync(employerId, jobId, clientId, accessToken);
+        if (serviceResult.IsSuccess) return RedirectToAction(nameof(OnGetAsync));
+        
+        if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
+    }
+    
+    private async Task<IActionResult> HandleUpdateAsync(JobRatingDto ratingDto, string employerId, string accessToken)
+    {
+        var serviceResult = await jobRatingService.PatchAsync(ratingDto, employerId, accessToken);
+        if (serviceResult.IsSuccess) return RedirectToAction(nameof(OnGetAsync));
+        
+        if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
     }
 }

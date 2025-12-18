@@ -1,12 +1,14 @@
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.Data;
 using Ergasia_WebApp.DTOs.Job;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Jobs;
 
-public class Index(IJobApiRepository jobApiRepository, IRatingApiRepository ratingApiRepository) : PageModel
+public class Index(IJobService jobService,IWorkerJobService workerJobService,
+    IEmployerRatingService employerRatingService) : PageModel
 {
     private ClientData _clientData = new(new HttpContextAccessor());
 
@@ -18,25 +20,45 @@ public class Index(IJobApiRepository jobApiRepository, IRatingApiRepository rati
     {
         if (_clientData.AccessToken == null) return Unauthorized();
 
-        var jobs = await jobApiRepository.GetAllUpcomingAsync();
+        var serviceResult = await jobService.GetAllUpcomingAsync();
 
-        if (jobs == null)
+        if (! serviceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
+            if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
             return RedirectToPage("/Error");
         }
         
-        foreach (var job in jobs)
+        foreach (var job in serviceResult.Data)
         {
             if (job.Id == null || job.EmployerId == null) continue;
-            if (await jobApiRepository.GetAvailableWorkSpotsAsync(job.Id, _clientData.AccessToken) <= 0) continue;
-            Jobs.Add(job);
             
-            var averageRating = await ratingApiRepository.GetEmployerAverageRating(job.EmployerId);
+            var workSpots = await GetAvailableWorkSpotsAsync(job.Id, _clientData.AccessToken);
+            if (workSpots is null or <= 0) continue;
+            
+            Jobs.Add(job);
+
+            var averageRating = await GetEmployersAverageRatingAsync(job.EmployerId);
             if (averageRating != null) AverageRating.Add(job.Id, (decimal)averageRating);
         }
-        Jobs = Jobs.OrderBy(j => j.DateOfBegin).ToList();
-        
+
+        Jobs = OrderJobsByDate(Jobs);
         return Page();
+    }
+
+    private async Task<int?> GetAvailableWorkSpotsAsync(string jobId, string accessToken)
+    {
+        var serviceResult = await workerJobService.GetAvailableWorkSpotsAsync(jobId, accessToken);
+        return serviceResult.Data;
+    }
+
+    private async Task<float?> GetEmployersAverageRatingAsync(string employerId)
+    {
+        var serviceResult = await employerRatingService.GetAverageRatingAsync(employerId);
+        return serviceResult.Data;
+    }
+
+    private List<JobDto> OrderJobsByDate(List<JobDto> jobs)
+    {
+        return Jobs.OrderBy(j => j.DateOfBegin).ToList();
     }
 }

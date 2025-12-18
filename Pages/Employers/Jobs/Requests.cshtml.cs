@@ -1,12 +1,14 @@
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.Data;
 using Ergasia_WebApp.DTOs.Job;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Employers.Jobs;
 
-public class Requests(IJobApiRepository jobApiRepository) : PageModel
+public class Requests(IJobService jobService, 
+    IJobRequestService jobRequestService, IWorkerJobService workerJobService) : PageModel
 {
     private ClientData _clientData = new (new HttpContextAccessor());
     
@@ -22,15 +24,16 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
         if (_clientData.AccessToken == null) return Unauthorized();
         if (_clientData.Id == null) return RedirectToPage("/Error");
        
-        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
-        if (job == null)
+        var jobServiceResult = await jobService.GetAsync(JobId, _clientData.AccessToken);
+        if (! jobServiceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
+            if (jobServiceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
             return RedirectToPage("Error");
         }
-        Job = job;
+        Job = jobServiceResult.Data;
         
-        JobRequests = await jobApiRepository.GetJobRequestsByJobIdAsync(JobId, _clientData.Id, _clientData.AccessToken);
+        var jobRequestsServiceResult =  await jobRequestService.GetByJobIdAsync(JobId, _clientData.Id, _clientData.AccessToken);
+        if (jobRequestsServiceResult.IsSuccess) JobRequests = jobRequestsServiceResult.Data.ToList();
         
         Error = error;
         return Page();
@@ -41,40 +44,40 @@ public class Requests(IJobApiRepository jobApiRepository) : PageModel
         if (_clientData.AccessToken == null) return Unauthorized();
         if (_clientData.Id == null) return RedirectToPage("/Error");
 
-        switch (method)
+        return method switch
         {
-            case "post":
-                var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
-                if (job == null)
-                {
-                    if (Response.StatusCode == 401) return Unauthorized();
-                    return RedirectToPage("Error");
-                }
-                var workspots = await jobApiRepository.GetAvailableWorkSpotsAsync(JobId, _clientData.AccessToken);
-                if (workspots <= 0) return RedirectToAction(nameof(OnGetAsync), new { error = "Job is at full capacity. Update job information to hire more workers"});
-                
-                var workerJob = await jobApiRepository.PostWorkerJobAsync(JobId, _clientData.Id, workerId, _clientData.AccessToken);
+            "post" => await HandlePostAsync(_clientData.Id, workerId, _clientData.AccessToken),
+            "delete" => await HandleDeleteAsync(_clientData.Id, workerId, _clientData.AccessToken),
+            _ => RedirectToPage("/Error")
+        };
+    }
 
-                if (workerJob == null)
-                {
-                    if (Response.StatusCode == 401) return Unauthorized();
-                    return RedirectToPage("/Error");
-                }
-
-                return RedirectToAction(nameof(OnGetAsync));
-            
-            case "delete":
-                var deleted = await jobApiRepository.DeleteJobRequest(JobId, _clientData.Id, workerId, _clientData.AccessToken);
-                if (!deleted)
-                {
-                    if (Response.StatusCode == 401) return Unauthorized();
-                    return RedirectToPage("/Error");
-                }
-
-                return RedirectToAction(nameof(OnGetAsync));
-            
-            default:
-                return RedirectToPage("/Error");
+    private async Task<IActionResult> HandlePostAsync(string clientId, string workerId, string accessToken)
+    {
+        var jobServiceResult = await jobService.GetAsync(JobId, accessToken);
+        if (! jobServiceResult.IsSuccess)
+        {
+            if (jobServiceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+            return RedirectToPage("Error");
         }
+        
+        var workspotsServiceResult = await workerJobService.GetAvailableWorkSpotsAsync(JobId, accessToken);
+        if (workspotsServiceResult is { IsSuccess: true, Data: <= 0 }) 
+            return RedirectToAction(nameof(OnGetAsync), new { error = "Job is at full capacity. Update job information to hire more workers"});
+
+        var workerJobsServiceResult = await workerJobService.PostAsync(JobId, clientId, workerId, accessToken);
+        if (workerJobsServiceResult.IsSuccess) return RedirectToAction(nameof(OnGetAsync));
+        
+        if (workerJobsServiceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
+    }
+
+    private async Task<IActionResult> HandleDeleteAsync(string clientId, string workerId, string accessToken)
+    {
+        var serviceResult = await jobRequestService.DeleteAsync(JobId, clientId, workerId, accessToken);
+        if (serviceResult.IsSuccess) return RedirectToAction(nameof(OnGetAsync));
+        
+        if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
     }
 }

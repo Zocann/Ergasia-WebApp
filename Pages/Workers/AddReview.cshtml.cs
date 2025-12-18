@@ -1,14 +1,15 @@
 using System.ComponentModel.DataAnnotations;
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.Data;
 using Ergasia_WebApp.DTOs.Rating;
 using Ergasia_WebApp.DTOs.Worker;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Workers;
 
-public class AddReview(IWorkerApiRepository workerApiRepository, IRatingApiRepository ratingApiRepository) : PageModel
+public class AddReview(IWorkerService workerService, IWorkerRatingService workerRatingService) : PageModel
 {
     private ClientData _clientData = new(new HttpContextAccessor());
 
@@ -23,67 +24,72 @@ public class AddReview(IWorkerApiRepository workerApiRepository, IRatingApiRepos
         if (_clientData.AccessToken == null) return Unauthorized();
         if (_clientData.Id == null) return RedirectToPage("/Error");
 
-        var worker = await workerApiRepository.GetAsync(WorkerId, _clientData.AccessToken);
-        if (worker == null)
+        var serviceResult = await workerService.GetAsync(WorkerId, _clientData.AccessToken);
+
+        if (! serviceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
+            if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
             return RedirectToPage("/Error");
         }
 
-        Worker = worker;
-        Rating = await ratingApiRepository.GetWorkerRatingAsync(WorkerId, _clientData.Id, _clientData.AccessToken);
-        Error = error;
+        Worker = serviceResult.Data;
         
+        var ratingServiceResult = await workerRatingService.GetAsync(WorkerId, _clientData.Id, _clientData.AccessToken);
+        Rating = ratingServiceResult.Data;
+        
+        Error = error;
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync(string workerId, [Required][Range(1, 5)] string rating, 
+    public async Task<IActionResult> OnPostAsync(string workerId, [Required][Range(1, 5)] int rating, 
         string verRating, string action, string? delete)
     {
-        if (!ModelState.IsValid)
-        {
-            return RedirectToAction(nameof(OnGetAsync), new {error = "Please provide a valid rating"});
-        }
+        if (!ModelState.IsValid) return RedirectToAction(nameof(OnGetAsync), new {error = "Please provide valid rating"});
         if (_clientData.AccessToken == null) return Unauthorized();
         if (_clientData.Id == null) return RedirectToPage("/Error");
         
         if (delete == "true")
         {
-            if (!await ratingApiRepository.DeleteWorkerRatingAsync(WorkerId, _clientData.Id, _clientData.AccessToken))
-            {
-                if (Response.StatusCode == 401) return Unauthorized();
-                return RedirectToPage("/Error");
-            }
-            return RedirectToAction(nameof(OnGetAsync)); 
+            return await HandleDelete(_clientData.Id, _clientData.AccessToken);
         }
         
-        WorkerRatingDto? workerRating;
-        
-        switch (action)
+        var ratingDto = new RatingDto(_clientData.Id, workerId, rating, verRating);
+
+        return action switch
         {
-            case "post":
-                workerRating = await ratingApiRepository.PostWorkerRatingAsync(workerId, _clientData.Id, rating, verRating, _clientData.AccessToken);
+            "post" => await HandlePost(ratingDto, _clientData.AccessToken),
+            "update" => await HandleUpdate(ratingDto, _clientData.AccessToken),
+            _ => RedirectToPage("/Error")
+        };
+    }
 
-                if (workerRating == null)
-                {
-                    if (Response.StatusCode == 401) return Unauthorized();
-                    return RedirectToPage("/Error");
-                }
-                break;
+    private async Task<IActionResult> HandleDelete(string clientId, string accessToken)
+    {
+        var serviceResult = await workerRatingService.DeleteAsync(WorkerId, clientId, accessToken);
+        
+        if (serviceResult.IsSuccess) return RedirectToAction(nameof(OnGetAsync));
+        
+        if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
+    }
 
-            case "update":
-                workerRating = await ratingApiRepository.PatchWorkerRatingAsync(workerId, _clientData.Id, rating, verRating, _clientData.AccessToken);
+    private async Task<IActionResult> HandlePost(RatingDto ratingDto, string accessToken)
+    {
+        var serviceResult = await workerRatingService.PostAsync(ratingDto, accessToken);
+        
+        if (serviceResult.IsSuccess) return RedirectToAction(nameof(OnGetAsync));
 
-                if (workerRating == null)
-                {
-                    if (Response.StatusCode == 401) return Unauthorized();
-                    return RedirectToPage("/Error");
-                }
-                break;
-            default:
-                return RedirectToPage("/Error");
-        }
+        if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
+    }
+    
+    private async Task<IActionResult> HandleUpdate(RatingDto ratingDto, string accessToken)
+    {
+        var serviceResult = await workerRatingService.PatchAsync(ratingDto, accessToken);
+        
+        if (serviceResult.IsSuccess) return RedirectToAction(nameof(OnGetAsync));
 
-        return RedirectToAction(nameof(OnGetAsync));
+        if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
     }
 }

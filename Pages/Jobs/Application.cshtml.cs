@@ -1,17 +1,20 @@
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.Data;
 using Ergasia_WebApp.DTOs.Job;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Jobs;
 
-public class Application(IJobApiRepository jobApiRepository) : PageModel
+public class Application(
+    IJobService jobService,
+    IWorkerJobService workerJobService,
+    IJobRequestService jobRequestService) : PageModel
 {
-    private ClientData _clientData = new (new HttpContextAccessor());
-    
-    [BindProperty(SupportsGet = true)] 
-    public required string JobId { get; set; }
+    private ClientData _clientData = new(new HttpContextAccessor());
+
+    [BindProperty(SupportsGet = true)] public required string JobId { get; set; }
     public required JobDto JobDto { get; set; }
     public WorkerJobDto? WorkerJob { get; set; }
     public JobRequestDto? JobRequest { get; set; }
@@ -21,16 +24,20 @@ public class Application(IJobApiRepository jobApiRepository) : PageModel
         if (_clientData.AccessToken == null) return Unauthorized();
         if (_clientData.Id == null) return RedirectToPage("/Error");
 
-        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
-        if (job?.Id == null)
+        var serviceResult = await jobService.GetAsync(JobId, _clientData.AccessToken);
+        if (!serviceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
+            if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
             return RedirectToPage("/Error");
         }
 
-        JobDto = job;
-        WorkerJob = await jobApiRepository.GetWorkerJobAsync(JobId, _clientData.Id, _clientData.AccessToken);
-        JobRequest = await jobApiRepository.GetJobRequestAsync(JobId, _clientData.Id, _clientData.AccessToken);
+        JobDto = serviceResult.Data;
+
+        var workerJobServiceResult = await workerJobService.GetAsync(JobId, _clientData.Id, _clientData.AccessToken);
+        WorkerJob = workerJobServiceResult.Data;
+
+        var jobRequestServiceResult = await jobRequestService.GetAsync(JobId, _clientData.Id, _clientData.AccessToken);
+        JobRequest = jobRequestServiceResult.Data;
 
         return Page();
     }
@@ -39,15 +46,12 @@ public class Application(IJobApiRepository jobApiRepository) : PageModel
     {
         if (_clientData.AccessToken == null) return Unauthorized();
         if (_clientData.Id == null) return RedirectToPage("/Error");
-        
-        var jobRequest = await jobApiRepository.PostJobRequestAsync(JobId, _clientData.Id, message, _clientData.AccessToken);
 
-        if (jobRequest == null)
-        {
-            if (Response.StatusCode == 401) return Unauthorized();
-            return RedirectToPage("/Error");
-        }
-        
-        return RedirectToPage("/Jobs/Application", new {jobId = JobId});
+        var jobRequestServiceResult =
+            await jobRequestService.PostAsync(JobId, _clientData.Id, message, _clientData.AccessToken);
+        if (jobRequestServiceResult.IsSuccess) return RedirectToPage("/Jobs/Application", new { jobId = JobId });
+
+        if (jobRequestServiceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
     }
 }

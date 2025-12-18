@@ -1,51 +1,65 @@
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.DTOs.Job;
+using Ergasia_WebApp.DTOs.Worker;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages;
 
 [IgnoreAntiforgeryToken]
-public class IndexModel(IJobApiRepository jobApiRepository, IRatingApiRepository ratingApiRepository) : PageModel
+public class IndexModel(IJobService jobApiService, IEmployerRatingService employerRatingApiService) : PageModel
 {
     public List<JobDto> Jobs { get; set; } = [];
-    public Dictionary<string, decimal> AverageRatings { get; set; } = new();
+    public Dictionary<string, float> AverageRatings { get; set; } = new();
     public string? Error;
     
     
     public async Task<IActionResult> OnGetAsync(string? error)
     {
-        Dictionary<string, decimal> allAverageRatings = new();
-        var result = await jobApiRepository.GetAllUpcomingAsync();
-        
-        if (result != null)
-        {
-            if (Response.StatusCode == 401) return Unauthorized();
+        Dictionary<string, float> allAverageRatings = new();
+        var serviceResult = await jobApiService.GetAllUpcomingAsync();
 
-            var jobs = result.ToList();
+        if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        
+        if (serviceResult.IsSuccess)
+        {
+            var jobs = serviceResult.Data.ToList();
             foreach (var job in jobs)
             {
-                if (job.EmployerId == null || job.Id == null) break;
-
-                var averageRating = await ratingApiRepository.GetEmployerAverageRating(job.EmployerId);
-                if (averageRating == null) continue;
-
-                allAverageRatings.Add(job.Id, (decimal)averageRating);
+                if (job.EmployerId == null || job.Id == null) continue;
+                var averageRating = await GetAverageRatingAsync(job.EmployerId);
+                if (averageRating != null) allAverageRatings.Add(job.Id, (float)averageRating);
             }
-
-            //Take only 4 best rated employers
-            AverageRatings = allAverageRatings.OrderByDescending(ar => ar.Value).Take(4).ToDictionary();
+            
+            const int numberOfRatings = 4;
+            AverageRatings = GetNumberOfBestRatings(numberOfRatings, allAverageRatings);
 
             
             foreach (var averageRating in AverageRatings)
             {
-                var job = jobs.FirstOrDefault(j => j.Id == averageRating.Key);
+                var job = GetJobByJobId(jobs, averageRating.Key);
                 if (job != null) Jobs.Add(job);
             }
         }
 
         Error = error;
-        
         return Page();
+    }
+
+    private async Task<float?> GetAverageRatingAsync(string employerId)
+    {
+        var serviceResult = await employerRatingApiService.GetAverageRatingAsync(employerId);
+        return serviceResult.Data;
+    }
+
+    private static Dictionary<string, float> GetNumberOfBestRatings(int numberOfRatings, Dictionary<string, float> allAverageRatings)
+    {
+        return allAverageRatings.OrderByDescending(ar => ar.Value).Take(numberOfRatings).ToDictionary();
+    }
+
+    private static JobDto? GetJobByJobId(List<JobDto> jobs, string jobId)
+    {
+        return jobs.FirstOrDefault(j => j.Id == jobId);
     }
 }

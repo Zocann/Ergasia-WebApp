@@ -1,37 +1,44 @@
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.Data;
 using Ergasia_WebApp.DTOs.Worker;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Workers;
 
-public class Index(IWorkerApiRepository workerApiRepository, IRatingApiRepository ratingApiRepository) : PageModel
+public class Index(IWorkerService workerService, IEmployerRatingService employerRatingService) : PageModel
 {
     private ClientData _clientData = new(new HttpContextAccessor());
 
     public required List<WorkerDto> Workers { get; set; }
-    public required Dictionary<string, decimal> AverageRating { get; set; } = new();
+    public required Dictionary<string, float> AverageRating { get; set; } = new();
 
     public async Task<IActionResult> OnGet()
     {
         if (_clientData.AccessToken == null) return Unauthorized();
 
-        var workers = await workerApiRepository.GetAllAsync(_clientData.AccessToken);
-        if (workers == null)
+        var serviceResult = await workerService.GetAllAsync(_clientData.AccessToken);
+        
+        if (!serviceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
+            if (serviceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
             return RedirectToPage("/Error");
         }
         
-        Workers = workers;
+        Workers = serviceResult.Data.ToList();
 
         foreach (var worker in Workers)
         {
-            var rating = await ratingApiRepository.GetWorkerAverageRating(worker.Id);
-            if (rating != null) AverageRating.Add(worker.Id, (decimal)rating);
+            await AddAverageRating(worker);
         }
         
         return Page();
+    }
+
+    private async Task AddAverageRating(WorkerDto worker)
+    {
+        var serviceResult = await employerRatingService.GetAverageRatingAsync(worker.Id);
+        if (serviceResult.IsSuccess) AverageRating.Add(worker.Id, serviceResult.Data);
     }
 }

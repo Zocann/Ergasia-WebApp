@@ -22,8 +22,7 @@ public class RegisterDto
     public required string Password { get; set; }
     
     [EmailAddress]
-    [Remote("IsUID_Available", "Validation")]
-    public string? Email { get; set; }
+    public required string Email { get; set; }
     
     [Phone] [Required]
     [Display(Name = "Phone number")]
@@ -40,7 +39,6 @@ public class RegisterDto
     [Required(ErrorMessage = "Please enter address")]
     [StringLength(30, MinimumLength = 3, ErrorMessage = "Address must be between 3 and 30 characters")]
     public required string Address { get; set; }
-    
-    [ValidDateOfBirth] [Required] 
-    public DateTime DateOfBirth { get; set; }
+
+    [Required] public DateTime DateOfBirth { get; set; } = DateTime.UtcNow;
 }

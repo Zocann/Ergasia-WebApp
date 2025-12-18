@@ -1,6 +1,4 @@
 using System.Net;
-using System.Text.Json;
-using Ergasia_WebApp.ApiRepositories.Interfaces;
 using Ergasia_WebApp.DTOs.User;
 using Ergasia_WebApp.Services;
 using Ergasia_WebApp.Services.Interfaces;
@@ -14,56 +12,87 @@ public class TokenRefreshMiddleware(RequestDelegate next)
         await next(context);
         var path = context.Request.Path;
 
-        // If API returned 401 Unauthorized, try to get new access token
-        if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
-        {
-            var refreshToken = context.Request.Cookies["refreshToken"];
-            if (!string.IsNullOrEmpty(refreshToken))
-            {
-                var client = clientFactory.CreateClient("API");
-                client.DefaultRequestHeaders.Add("Cookie", $"refreshToken={refreshToken}");
-        
-                var refreshResponse = await client.GetAsync("Users/refresh-token");
-                if (refreshResponse.IsSuccessStatusCode)
-                {
-                    var responseString = await refreshResponse.Content.ReadAsStringAsync();
-                    var user = JsonSerializerService.Deserialize<UserDto>(responseString);
+        if (!IsStatusCodeUnauthorized(context.Response.StatusCode)) return;
 
-                    if (user != null && user.RefreshToken != null && user.RefreshTokenExpiration != null)
-                    {
-                        //Get user role
-                        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {user.AccessToken}");
+        var refreshToken = GetRefreshTokenWithContext(context);
+        if (string.IsNullOrEmpty(refreshToken)) context.Response.Redirect("/Account/Logout");
 
-                        var response = await client.GetAsync($"Users/role/{user.Id}");
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            context.Response.Redirect("/Error");
-                        }
+        var client = clientFactory.CreateClient("API");
+        client = AddHeaderToClient(headerName: "Cookie",
+            headerValue: $"refreshToken={refreshToken}", client);
 
-                        responseString = await response.Content.ReadAsStringAsync();
+        var refreshResponse = await GetDataFromApiAsync(client, requestUri: "Users/refresh-token");
+        if (!refreshResponse.IsSuccessStatusCode) context.Response.Redirect("/Account/Logout");
 
-                        if (string.IsNullOrEmpty(responseString)) context.Response.Redirect("/Error");
+        var userAsJson = await ConvertHttpResponseMessageToStringAsync(refreshResponse);
+        var userDto = DeserializeUserDtoFromJson(userAsJson);
 
-                        // Update cookies
-                        if (cookieService == null) throw new InvalidOperationException("No cookie service found");
+        if (userDto?.AccessToken == null || userDto.RefreshToken == null ||
+            userDto.RefreshTokenExpiration == null) return;
 
-                        cookieService.AddCookie("userRole", responseString, (DateTime)user.RefreshTokenExpiration);
+        client = AddHeaderToClient(headerName: "Authorization", headerValue: $"Bearer {userDto.AccessToken}", client);
+        var roleResponse = await GetDataFromApiAsync(client, requestUri: $"Users/role/{userDto.Id}");
 
-                        cookieService.AddCookie("refreshToken", user.RefreshToken,
-                            (DateTime)user.RefreshTokenExpiration);
-                        if (user.AccessToken != null) cookieService.AddCookie("accessToken", user.AccessToken);
-                        cookieService.AddCookie("userId", user.Id, (DateTime)user.RefreshTokenExpiration);
-                        cookieService.AddCookie("userName", $"{user.FirstName} {user.LastName}",
-                            (DateTime)user.RefreshTokenExpiration);
+        if (!roleResponse.IsSuccessStatusCode) context.Response.Redirect("/Error");
 
+        var role = await ConvertHttpResponseMessageToStringAsync(roleResponse);
+        if (string.IsNullOrEmpty(role)) context.Response.Redirect("/Error");
 
-                        context.Response.Redirect(path);
-                    }
-                }
-                else context.Response.Redirect("/Account/Logout");
-            }
-            else context.Response.Redirect("/Account/Logout");
-        }
+        UpdateCookies(cookieService, userDto, role);
+
+        context.Response.Redirect(path);
+    }
+
+    private static bool IsStatusCodeUnauthorized(int statusCode)
+    {
+        return statusCode == (int)HttpStatusCode.Unauthorized;
+    }
+
+    private static string? GetRefreshTokenWithContext(HttpContext context)
+    {
+        return context.Request.Cookies["refreshToken"];
+    }
+
+    private static HttpClient AddHeaderToClient(string headerName, string headerValue, HttpClient client)
+    {
+        client.DefaultRequestHeaders.Add(headerName, headerValue);
+        return client;
+    }
+
+    private static async Task<HttpResponseMessage> GetDataFromApiAsync(HttpClient client, string requestUri)
+    {
+        return await client.GetAsync(requestUri);
+    }
+
+    private static async Task<string> ConvertHttpResponseMessageToStringAsync(HttpResponseMessage response)
+    {
+        return await response.Content.ReadAsStringAsync();
+    }
+
+    private static UserDto? DeserializeUserDtoFromJson(string json)
+    {
+        return JsonSerializerService.Deserialize<UserDto>(json);
+    }
+
+    private static bool IsValidUser(UserDto? userDto)
+    {
+        return userDto is { AccessToken: not null, RefreshToken: not null, RefreshTokenExpiration: not null };
+    }
+
+    private static void UpdateCookies(ICookieService cookieService, UserDto userDto, string role)
+    {
+        cookieService.AddCookie("userRole", role, (DateTime)userDto.RefreshTokenExpiration!);
+
+        cookieService.AddCookie("refreshToken", userDto!.RefreshToken,
+            (DateTime)userDto.RefreshTokenExpiration);
+
+        cookieService.AddCookie("accessToken", userDto!.AccessToken);
+
+        cookieService.AddCookie("userId", userDto.Id,
+            (DateTime)userDto.RefreshTokenExpiration);
+
+        cookieService.AddCookie("userName", $"{userDto.FirstName} {userDto.LastName}",
+            (DateTime)userDto.RefreshTokenExpiration);
     }
 }
 

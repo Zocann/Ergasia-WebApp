@@ -1,12 +1,13 @@
-using Ergasia_WebApp.ApiRepositories.Interfaces;
+using System.Net;
 using Ergasia_WebApp.Data;
 using Ergasia_WebApp.DTOs.Job;
+using Ergasia_WebApp.Services.Model.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ergasia_WebApp.Pages.Employers.Jobs;
 
-public class Update(IJobApiRepository jobApiRepository) : PageModel
+public class Update(IJobService jobService, IWorkerJobService workerJobService) : PageModel
 {
     private ClientData _clientData = new(new HttpContextAccessor());
     
@@ -19,13 +20,13 @@ public class Update(IJobApiRepository jobApiRepository) : PageModel
     {
         if (_clientData.AccessToken == null) return Unauthorized();
         
-        var job = await jobApiRepository.GetAsync(JobId, _clientData.AccessToken);
-        if (job?.Id == null)
+        var jobServiceResult = await jobService.GetAsync(JobId, _clientData.AccessToken);
+        if (! jobServiceResult.IsSuccess)
         {
-            if (Response.StatusCode == 401) return Unauthorized();
+            if (jobServiceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
             return RedirectToPage("/Error");
         }
-        JobDto = job;
+        JobDto = jobServiceResult.Data;
         Error = error;
         
         return Page();
@@ -33,39 +34,55 @@ public class Update(IJobApiRepository jobApiRepository) : PageModel
 
     public async Task<IActionResult> OnPostAsync(JobDto jobDto, string date)
     {
-        if (!DateTime.TryParse(date, out var dateOfBegin) || dateOfBegin < DateTime.Now) return RedirectToAction(nameof(OnGetAsync), new {error = "Invalid date of begin"});
-        if (!ModelState.IsValid)
-        {
+        var dateOfBegin = ParseDateFromString(date);
+        if (dateOfBegin == null || !IsValidDate(dateOfBegin))
+            return RedirectToAction(nameof(OnGetAsync), new {error = "Invalid date of begin"});
+        if (!ModelState.IsValid) 
             return RedirectToAction(nameof(OnGetAsync), new {error = "Please follow form instructions."});
-        }
         
-        jobDto.DateOfBegin = dateOfBegin;
+        jobDto.DateOfBegin = (DateTime)dateOfBegin;
         jobDto.EmployerId = Request.Cookies["userId"];
         if (jobDto.EmployerId == null || jobDto.Id == null) return RedirectToPage("/Error");
         
         if (_clientData.AccessToken == null) return Unauthorized();
         
         //Checking for existing workerJobs to not change date if there are already signed workers
-        var workerJob = await jobApiRepository.GetWorkerJobsByJobIdAsync(jobDto.Id, _clientData.AccessToken);
-        if (workerJob != null)
+        var workerJobServiceResult = await workerJobService.GetByJobIdAsync(jobDto.Id, _clientData.AccessToken);
+        if (workerJobServiceResult.IsSuccess)
         {
-            var j = await jobApiRepository.GetAsync(jobDto.Id, _clientData.AccessToken);
-            if (j == null)
+            var jobServiceResult = await jobService.GetAsync(jobDto.Id, _clientData.AccessToken);
+            if (! jobServiceResult.IsSuccess)
             {
-                if (Response.StatusCode == 401) return Unauthorized();
+                if (jobServiceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
                 return RedirectToPage("/Error");
             }
-            if (j.DateOfBegin != jobDto.DateOfBegin) return RedirectToAction(nameof(OnGetAsync), new {error = "Cannot change date of beginning if workers are already registered to this job."});
+            if (! JobsDateOfBeginMatches(jobServiceResult.Data, JobDto)) 
+                return RedirectToAction(nameof(OnGetAsync), new {error = "Cannot change date of beginning if workers are already registered to this job."});
         }
 
-        var job = await jobApiRepository.PatchAsync(jobDto, _clientData.AccessToken);
+        var updateJobServiceResult = await jobService.PatchAsync(jobDto, _clientData.AccessToken);
 
-        if (job == null)
-        {
-            if (Response.StatusCode == 401) return Unauthorized();
-            return RedirectToPage("/Error");
-        }
+        if (updateJobServiceResult.IsSuccess)
+            return RedirectToPage("/Employers/Jobs/Information", new { jobId = updateJobServiceResult.Data.Id });
         
-        return RedirectToPage("/Employers/Jobs/Information", new { jobId = job.Id });
+        if (updateJobServiceResult.StatusCode == HttpStatusCode.Unauthorized) return Unauthorized();
+        return RedirectToPage("/Error");
+
+    }
+
+    private static bool JobsDateOfBeginMatches(JobDto firstJob, JobDto secondJob)
+    {
+        return firstJob.DateOfBegin == secondJob.DateOfBegin;
+    }
+
+    private static DateTime? ParseDateFromString(string dateOfBegin)
+    {
+        if (DateTime.TryParse(dateOfBegin, out var date)) return date;
+        return null;
+    }
+
+    private static bool IsValidDate(DateTime? date)
+    {
+        return date > DateTime.UtcNow;
     }
 }
